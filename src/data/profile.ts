@@ -55,8 +55,10 @@ export const profile: Profile = {
 
   email: 'masuda@li.comp.isct.ac.jp',
 
-  // TODO(user): 顔写真を public/profile.jpg に置いて '/profile.jpg' に書き換える（今はダミーSVG）。
-  photo: '/profile.svg',
+  // ヒーローの画像であり、OGP画像（SNS共有時のサムネイル）も兼ねています。
+  // 差し替える場合は public/ に置いてパスを書き換えてください。
+  // 表示は120px（Retinaで240px）なので、512px程度あれば十分です。
+  photo: '/profile.png',
 
   // TODO(user): CV の PDF を public/cv.pdf に置いて '/cv.pdf' と書く。
   // 空文字のあいだはヒーローの「CV (PDF)」ボタンは表示されません。
