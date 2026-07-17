@@ -1,15 +1,33 @@
 name: Deploy to GitHub Pages
+
+# main に push すると、このワークフローがサイトをビルドして GitHub Pages に公開します。
+# 手元で npm run build が通っていれば、基本ここは触る必要はありません。
+
 on:
   push: { branches: [main] }
-  workflow_dispatch:
-permissions: { contents: read, pages: write, id-token: write }
+  workflow_dispatch: # Actions タブから手動実行したいとき用
+
+permissions:
+  contents: read
+  actions: read # deploy-pages v4 以降が artifact を ID で取りに行くために必要
+  pages: write
+  id-token: write
+
+# 同時に複数のデプロイが走らないようにする（cancel-in-progress: false で公開中のものは中断しない）
 concurrency: { group: pages, cancel-in-progress: false }
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: withastro/action@v3
+      - uses: actions/checkout@v5
+      - uses: withastro/action@v6
+        with:
+          # Astro 7 は Node >=22.12.0 を要求します。
+          # 明示しないとアクション既定の Node になり、古いとビルドが落ちます
+          # （実際 withastro/action@v3 の既定は Node 20 で "not supported by Astro!" になりました）。
+          node-version: 24
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -18,4 +36,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        # withastro/action@v6 は内部で upload-pages-artifact@v5 を使うため、
+        # デプロイ側も v5 系に揃えます（世代がずれると artifact を見つけられません）。
+        uses: actions/deploy-pages@v5
