@@ -64,8 +64,9 @@
   period:
     ja: 2026年 - 現在
     en: 2026 - Present
-  # TODO(user): 「生命情報科学若手の会」の公式英語名称を確認してください（下訳です）。
-  #             publications.yml の第17回年会の表記と揃えること。
+  # 「生命情報科学若手の会」に公式英語名称は存在しません（公式サイト・年会ページ・関係者の
+  # researchmap を確認済み。サイトのタイトルとドメインが "bioinfowakate" なだけで、英語表記なし）。
+  # 下の英訳は説明的な訳です。publications.yml の第17回年会の表記と必ず揃えてください。
   title:
     ja: 生命情報科学若手の会 第18回年会 スタッフ
     en: Staff, 18th Annual Meeting of the Society for Young Researchers in Bioinformatics

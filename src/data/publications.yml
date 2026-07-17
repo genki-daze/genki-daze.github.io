@@ -113,7 +113,8 @@
     en: Estimation of antigen-specific antibody sequences from BCR repertoires using machine learning
   venue:
     ja: 第17回生命情報科学若手の会 年会, 兵庫, 2025年9月（ポスター発表）
-    # TODO(user): 「生命情報科学若手の会」の公式英語名称を確認してください（下訳です）。
+    # 「生命情報科学若手の会」に公式英語名称は存在しないため、説明的な訳です（確認済み）。
+    # cv.yml の第18回年会スタッフの表記と必ず揃えてください。
     en: 17th Annual Meeting of the Society for Young Researchers in Bioinformatics, Hyogo, Japan, September 2025 (Poster)
   year: 2025
   month: 9
