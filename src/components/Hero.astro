@@ -61,8 +61,6 @@ const photo = profile.photo?.trim() ?? '';
         {showReading && <span class="hero__reading">{nameReading}</span>}
       </h1>
 
-      <p class="hero__tagline">{pick(profile.tagline, lang)}</p>
-
       {
         interests.length > 0 && (
           <ul class="hero__interests" aria-label={tr('interests_label')}>
@@ -149,14 +147,6 @@ const photo = profile.photo?.trim() ?? '';
     font-weight: 400;
     line-height: var(--leading-snug);
     letter-spacing: var(--tracking-wide);
-  }
-
-  .hero__tagline {
-    max-width: var(--measure);
-    margin-top: var(--space-sm);
-    font-size: var(--font-size-lg);
-    line-height: var(--leading-prose);
-    letter-spacing: var(--tracking-ja);
   }
 
   /* --- 関心分野のタグ ---------------------------------------------------- */

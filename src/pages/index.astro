@@ -20,7 +20,7 @@ const lang = 'ja' as const;
 // <title> と description は profile.ts から組み立てます。
 // ここに直接書かないでください（profile.ts を直せば両方に反映されます）。
 const title = `${profile.name.ja} | ${profile.affiliation.ja}`;
-const description = `${profile.affiliation.ja}・${profile.name.ja}。${profile.tagline.ja}`;
+const description = `${profile.affiliation.ja}・${profile.name.ja}`;
 ---
 
 <BaseLayout lang={lang} title={title} description={description}>

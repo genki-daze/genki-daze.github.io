@@ -12,7 +12,6 @@ export type Profile = {
   nameReading: Bilingual;
   affiliation: Bilingual;
   lab: Bilingual;
-  tagline: Bilingual;
   location: Bilingual;
   email: string;
   photo: string;
@@ -42,12 +41,6 @@ export const profile: Profile = {
   lab: {
     ja: '大上研究室',
     en: 'Ohue Laboratory',
-  },
-
-  // TODO(user): 業績タイトルから起こした下訳です。研究の説明として適切か確認してください。
-  tagline: {
-    ja: '抗体言語モデルを用いて、BCRレパトアから抗原特異的な抗体配列を同定する研究をしています。',
-    en: 'I work on identifying antigen-specific antibody sequences from BCR repertoires using antibody language models.',
   },
 
   // 大上研究室はすずかけ台（横浜）キャンパス G3棟。違っていれば直してください。
