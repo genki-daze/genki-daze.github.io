@@ -40,7 +40,8 @@ export const ui = {
 
   // --- CV ---
   cv_education: { ja: '学歴', en: 'Education' },
-  cv_experience: { ja: '職歴・研究経験', en: 'Experience' },
+  // インターン・TA・学会スタッフが混在するため、「職歴」ではなく広めの語にしています。
+  cv_experience: { ja: '経歴・活動', en: 'Experience' },
   cv_awards: { ja: '受賞', en: 'Awards' },
   cv_skills: { ja: 'スキル', en: 'Skills' },
 

@@ -38,21 +38,49 @@
     ja: 東京工業大学（現・東京科学大学）情報理工学院 情報工学系 学士（工学）
     en: B.Eng., Department of Computer Science, School of Computing, Tokyo Institute of Technology (now Institute of Science Tokyo)
 
-# ---------------- 職歴・研究経験（現在0件 → セクションごと非表示） ----------------
-#
-# 例:
-# - id: exp-internship
-#   section: experience
-#   order: 2026
-#   period:
-#     ja: 2026年8月 - 2026年9月
-#     en: Aug 2026 - Sep 2026
-#   title:
-#     ja: 〇〇株式会社 研究インターンシップ
-#     en: Research Intern, 〇〇 Inc.
-#   detail:
-#     ja: 〇〇チームで〇〇に従事。
-#     en: Worked on 〇〇 with the 〇〇 team.
+# ---------------- 経歴・活動 ----------------
+
+- id: exp-ta-programming
+  section: experience
+  order: 2026.2
+  # TODO(user): 担当を開始した年月が分かれば「2026年4月 - 現在」のように具体化してください。
+  period:
+    ja: 2026年 - 現在
+    en: 2026 - Present
+  title:
+    ja: ティーチングアシスタント（TA）東京科学大学 情報理工学院 情報工学系
+    en: Teaching Assistant, Department of Computer Science, School of Computing, Institute of Science Tokyo
+  # 「手続き型プログラミング基礎」は CSC.T243（1Q, C言語）。シラバスに公式英語名は無いため、
+  # 英語表記は説明的な訳です。
+  # TODO(user): 公式英語名があれば差し替えてください。
+  detail:
+    ja: 手続き型プログラミング基礎・手続き型プログラミング発展
+    en: Procedural Programming (Basics / Advanced)
+
+- id: exp-bioinfowakate-18th-staff
+  section: experience
+  order: 2026.1
+  # 第18回年会の日程は未公表（2026年7月時点）。確定したら period を具体化してください。
+  period:
+    ja: 2026年 - 現在
+    en: 2026 - Present
+  # TODO(user): 「生命情報科学若手の会」の公式英語名称を確認してください（下訳です）。
+  #             publications.yml の第17回年会の表記と揃えること。
+  title:
+    ja: 生命情報科学若手の会 第18回年会 スタッフ
+    en: Staff, 18th Annual Meeting of the Society for Young Researchers in Bioinformatics
+
+- id: exp-fujifilm-internship
+  section: experience
+  order: 2025.9
+  # TODO(user): 「長期」とのことなので、9月以外にもまたがっていれば期間を直してください。
+  period:
+    ja: 2025年9月
+    en: Sep 2025
+  # TODO(user): 英訳を確認してください（プログラム名の下訳です）。
+  title:
+    ja: 富士フイルム株式会社 情報系開発型長期インターンシップ
+    en: Long-term Internship (Information Systems Development), FUJIFILM Corporation
 
 # ---------------- 受賞（現在0件 → セクションごと非表示） ----------------
 #
