@@ -25,8 +25,8 @@
     en: M.Eng. Program, Department of Computer Science, School of Computing, Institute of Science Tokyo
   detail:
     # TODO(user): 修士論文のテーマが決まっていれば書き足してください（未定なら detail ごと削除可）。
-    ja: 大上研究室（Life Intelligence）
-    en: Ohue Laboratory (Life Intelligence)
+    ja: 大上研究室
+    en: Ohue Laboratory
 
 - id: edu-bachelor
   section: education

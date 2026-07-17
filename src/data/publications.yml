@@ -18,26 +18,27 @@
 
 # ---------------- 学術論文 / プレプリント ----------------
 
-- id: lm-qasas-medrxiv-2026
-  type: preprint
+- id: lm-qasas-frontiers-2026
+  type: journal
   authors:
-    ja: G. Masuda, Y. Funakoshi, S. Iizumi, et al.
-    en: G. Masuda, Y. Funakoshi, S. Iizumi, et al.
+    ja: G. Masuda, Y. Funakoshi, S. Iizumi, K. Yakushijin, G. Ohji, H. Minami, M. Ohue
+    en: G. Masuda, Y. Funakoshi, S. Iizumi, K. Yakushijin, G. Ohji, H. Minami, M. Ohue
   title:
     ja: 'LM-QASAS: Reference-free identification of antigen-specific sequences from the BCR repertoire using antibody language models'
     en: 'LM-QASAS: Reference-free identification of antigen-specific sequences from the BCR repertoire using antibody language models'
+  # TODO(user): 掲載後に「掲載決定 / in press」を外し、巻・論文番号と Frontiers 側の DOI を追記してください。
+  #             month も実際の掲載月に更新すること（今は acceptance の月を入れています）。
   venue:
-    ja: medRxiv（プレプリント）
-    en: medRxiv (preprint)
-  # medRxiv の posted date は 2026-04-01（DOI のメタデータで確認済み。
-  # DOI 文字列に含まれる 2026.03.31 は投稿日で、公開日ではありません）
+    ja: Frontiers in Immunology（掲載決定）
+    en: Frontiers in Immunology (in press)
   year: 2026
-  month: 4
+  month: 7
+  # プレプリント（medRxiv v1, posted 2026-04-01）は査読前の版です。
+  # 数値・主張が査読版と異なるため、掲載後は Frontiers 側のリンクを主にしてください。
+  # label は日英で共通なので、言語に依らず読めるものにしています。
   links:
-    - label: DOI
+    - label: Preprint (medRxiv)
       url: https://doi.org/10.64898/2026.03.31.26349834
-    - label: medRxiv
-      url: https://www.medrxiv.org/content/10.64898/2026.03.31.26349834v1
 
 # ---------------- 国内学会・シンポジウムにおける発表 ----------------
 

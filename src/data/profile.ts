@@ -40,8 +40,8 @@ export const profile: Profile = {
   // TODO(user): 指導教員名も載せるなら「大上研究室（指導教員: 大上 雅史 先生）」のように追記。
   //             役職（教授 / 准教授）は未確認のため、意図的に書いていません。
   lab: {
-    ja: '大上研究室（Life Intelligence）',
-    en: 'Ohue Laboratory (Life Intelligence)',
+    ja: '大上研究室',
+    en: 'Ohue Laboratory',
   },
 
   // TODO(user): 業績タイトルから起こした下訳です。研究の説明として適切か確認してください。
