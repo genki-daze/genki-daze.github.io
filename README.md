@@ -35,11 +35,13 @@ Astro を知らなくても運用できます。基本的に触るのは
 
 | # | ファイル | 何をするか |
 |---|---|---|
-| 1 | `src/data/skills.yml` | **唯一の未記入セクション。** 中身が全部コメントアウトされているため、Skills セクションは非表示です。情報をもらえていないので、勝手に「Python」等と書くと経歴詐称になると判断して空にしてあります。`#` を外して実際に使えるものだけ書いてください |
-| 2 | `src/content/about/ja.md` + `en.md` | 研究の動機・この分野を選んだ理由を1段落。**進学先の先生や採用担当が最も読む部分**です。事実は入っていますが「あなたらしさ」がまだありません |
-| 3 | `src/data/publications.yml` | 国内学会発表の**英語タイトル**は日本語からの下訳です。正式な英語表記に直してください（該当行に個別の TODO 付き）。※共著者のローマ字は LM-QASAS の著者リストで確認済みなので正確です |
-| 4 | `src/data/profile.ts` | `links`：X / Google Scholar / ORCID / researchmap があれば、コメントを外して ID を入れてください。GitHub のみ有効です |
-| 5 | `src/content/research/ja/topic-1.md`, `topic-2.md`（+ `en/`） | 手法の要点を2〜4文。topic-1 は medRxiv のアブストラクトから起こしてあるので事実は正確ですが、表現はご自身の言葉に |
+| 1 | `src/content/about/ja.md` + `en.md` | 研究の動機・この分野を選んだ理由を1段落。**進学先の先生や採用担当が最も読む部分**です。事実は入っていますが「あなたらしさ」がまだありません |
+| 2 | `src/data/publications.yml` | 国内学会発表の**英語タイトル**は日本語からの下訳です。正式な英語表記に直してください（該当行に個別の TODO 付き）。※共著者のローマ字は LM-QASAS の著者リストで確認済みなので正確です |
+| 3 | `src/data/profile.ts` | `links`：X / Google Scholar / ORCID / researchmap があれば、コメントを外して ID を入れてください。GitHub のみ有効です |
+| 4 | `src/content/research/ja/topic-1.md`, `topic-2.md`（+ `en/`） | 手法の要点を2〜4文。topic-1 は medRxiv のアブストラクトから起こしてあるので事実は正確ですが、表現はご自身の言葉に |
+
+> **Skills（スキル）セクションについて**: 不要との判断で機構ごと削除してあります。
+> 就活等で必要になったら「4-6. Skills セクションを復活させる」の手順で戻せます。
 
 ### 1-2. 優先度：中
 
@@ -241,6 +243,68 @@ links:
 ```
 
 不要な行は**削除**すればアイコンごと消えます。
+
+### 4-6. Skills セクションを復活させる
+
+「スキル不要」との判断で、Skills セクションは**機構ごと削除**してあります（空のまま残すと
+ビルドのたびに警告が出るため）。就活等で必要になったら、以下の3手順で戻せます。
+
+**1) `src/data/skills.yml` を新規作成:**
+
+```yaml
+- id: skills-languages
+  order: 1
+  category: { ja: プログラミング言語, en: Programming Languages }
+  items: [Python, R, Shell]
+
+- id: skills-tools
+  order: 2
+  category: { ja: ツール・環境, en: Tools & Environments }
+  items: [Git / GitHub, Linux, PyTorch]
+```
+
+**2) `src/content.config.ts` にコレクションを追加:**
+
+```ts
+const skills = defineCollection({
+  loader: file('src/data/skills.yml'),
+  schema: z.object({ order: z.number(), category: bilingual, items: z.array(z.string()) }),
+});
+
+// 最終行の export に skills を足す
+export const collections = { publications, cv, skills, research, about };
+```
+
+**3) `src/components/CVSection.astro` に表示を追加。** frontmatter に:
+
+```ts
+const skillGroups = (await getCollection('skills')).sort((a, b) => a.data.order - b.data.order);
+```
+
+`</div>` の直前に:
+
+```astro
+{
+  skillGroups.length > 0 && (
+    <div class="cv-block">
+      <h3 class="cv-block__title">{tr('cv_skills')}</h3>
+      <dl class="skills">
+        {skillGroups.map((group) => (
+          <Fragment>
+            <dt class="skills__category">{group.data.category[lang]}</dt>
+            <dd class="skills__items">
+              {group.data.items.map((item) => <span class="tag tag--sm">{item}</span>)}
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+    </div>
+  )
+}
+```
+
+文言キー `cv_skills` は `src/i18n/ui.ts` に残してあるので、そのまま使えます。
+`.skills` 系の CSS は削除済みなので、レイアウトを整えるなら `<style>` に足してください。
 
 ### 4-5. 数式の書き方
 

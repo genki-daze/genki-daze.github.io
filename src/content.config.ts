@@ -30,10 +30,8 @@ const cv = defineCollection({
   }),
 });
 
-const skills = defineCollection({
-  loader: file('src/data/skills.yml'),
-  schema: z.object({ order: z.number(), category: bilingual, items: z.array(z.string()) }),
-});
+// Skills（スキル）コレクションは不要との判断で外してあります。
+// 復活させたい場合は README の「4-6. Skills セクションを復活させる」を参照してください。
 
 const research = defineCollection({
   loader: glob({ base: './src/content/research', pattern: '**/*.md' }),
@@ -50,4 +48,4 @@ const about = defineCollection({
   schema: z.object({}).passthrough(),
 });
 
-export const collections = { publications, cv, skills, research, about };
+export const collections = { publications, cv, research, about };

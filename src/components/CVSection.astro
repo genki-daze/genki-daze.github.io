@@ -1,12 +1,14 @@
 ---
 /**
- * CVSection.astro — 経歴（学歴 / 職歴・研究経験 / 受賞）とスキル
+ * CVSection.astro — 経歴（学歴 / 職歴・研究経験 / 受賞）
  *
  * 表示するデータ:
- *   ・src/data/cv.yml      … cv コレクション。section ごとに order の大きい順（＝新しい順）。
- *   ・src/data/skills.yml  … skills コレクション。order の小さい順。
+ *   ・src/data/cv.yml … cv コレクション。section ごとに order の大きい順（＝新しい順）。
  *
  * 中身が 0 件のかたまりは、見出しごと表示しません（空の「受賞」が残らないように）。
+ *
+ * Skills（スキル）セクションは不要との判断で外してあります。
+ * 復活させたい場合は README の「4-6. Skills セクションを復活させる」を参照してください。
  *
  * 使い方:  <CVSection lang="ja" />
  */
@@ -23,9 +25,6 @@ const tr = t(lang);
 type CvSection = CollectionEntry<'cv'>['data']['section'];
 
 const cvEntries = await getCollection('cv');
-
-// skills は order の小さいものから
-const skillGroups = (await getCollection('skills')).sort((a, b) => a.data.order - b.data.order);
 
 // 表示する順番と見出し。文言は必ず ui.ts 経由（英語版が壊れないように）。
 const blockDefs: { key: CvSection; title: string }[] = [
@@ -44,7 +43,7 @@ const blocks = blockDefs
   }))
   .filter((block) => block.items.length > 0);
 
-const isEmpty = blocks.length === 0 && skillGroups.length === 0;
+const isEmpty = blocks.length === 0;
 ---
 
 <section class="section section--alt" id="cv">
@@ -72,25 +71,6 @@ const isEmpty = blocks.length === 0 && skillGroups.length === 0;
       ))
     }
 
-    {
-      skillGroups.length > 0 && (
-        <div class="cv-block">
-          <h3 class="cv-block__title">{tr('cv_skills')}</h3>
-          <dl class="skills">
-            {skillGroups.map((group) => (
-              <Fragment>
-                <dt class="skills__category">{group.data.category[lang]}</dt>
-                <dd class="skills__items">
-                  {group.data.items.map((item) => (
-                    <span class="tag tag--sm">{item}</span>
-                  ))}
-                </dd>
-              </Fragment>
-            ))}
-          </dl>
-        </div>
-      )
-    }
   </div>
 </section>
 
@@ -164,48 +144,12 @@ const isEmpty = blocks.length === 0 && skillGroups.length === 0;
     letter-spacing: var(--tracking-ja);
   }
 
-  /* --- スキル ------------------------------------------------------------ */
-  .skills {
-    display: grid;
-  }
-
-  .skills__category {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    letter-spacing: var(--tracking-normal);
-  }
-
-  .skills__items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2xs);
-    margin-top: var(--space-2xs);
-  }
-
-  /* 次のカテゴリとの間隔（狭い画面のとき） */
-  .skills__items + .skills__category {
-    margin-top: var(--space-md);
-  }
-
-  /* --- 広い画面: 期間 / カテゴリを左の列にそろえる ----------------------- */
+  /* --- 広い画面: 期間を左の列にそろえる --------------------------------- */
   @media (min-width: 40em) {
     .timeline__item {
       grid-template-columns: 11rem 1fr;
       gap: var(--space-md);
       align-items: baseline;
-    }
-
-    .skills {
-      grid-template-columns: 11rem 1fr;
-      column-gap: var(--space-md);
-      row-gap: var(--space-sm);
-      align-items: baseline;
-    }
-
-    .skills__items,
-    .skills__items + .skills__category {
-      margin-top: 0;
     }
   }
 </style>
