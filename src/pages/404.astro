@@ -1,0 +1,94 @@
+---
+/**
+ * 404.astro — 存在しない URL を開いたときのページ
+ *
+ * ・GitHub Pages は 404 のとき、自動でこのページ（/404.html）を返します。設定は不要です。
+ * ・日本語と英語を両方並べます。どの言語の人がここに迷い込むか分からないためです。
+ *   このページだけは、どちらか片方の言語に決め打ちしません。
+ * ・ヘッダーのナビはわざと置いていません。ナビの行き先は '#about' などの
+ *   「トップページの中の場所」なので、このページに置くとリンク切れになります。
+ *   代わりに、日本語版 '/' と英語版 '/en/' へ戻るボタンを大きく出しています。
+ * ・文言は src/i18n/ui.ts の notfound_* です（t(lang) は片方の言語しか返せないので、
+ *   ここだけは ui を直接読んで ja / en の両方を取り出しています）。
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { ui } from '../i18n/ui';
+
+// <html lang> はサイトの既定言語（日本語）にし、
+// 英語のかたまりだけを lang="en" で囲みます。こうすると読み上げソフトが
+// それぞれを正しい発音で読みます。
+const lang = 'ja' as const;
+
+const title = `404 | ${ui.notfound_title.ja} / ${ui.notfound_title.en}`;
+const description = `${ui.notfound_body.ja} / ${ui.notfound_body.en}`;
+---
+
+<BaseLayout lang={lang} title={title} description={description}>
+  <main class="main notfound" id="main">
+    <div class="container notfound__inner">
+      <p class="notfound__code">404</p>
+
+      <div class="notfound__block">
+        <h1 class="notfound__title">{ui.notfound_title.ja}</h1>
+        <p class="notfound__body">{ui.notfound_body.ja}</p>
+        <p class="notfound__action">
+          <a class="btn btn--primary" href="/">{ui.notfound_home.ja}</a>
+        </p>
+      </div>
+
+      <hr class="notfound__rule" />
+
+      <div class="notfound__block" lang="en">
+        <h2 class="notfound__title">{ui.notfound_title.en}</h2>
+        <p class="notfound__body">{ui.notfound_body.en}</p>
+        <p class="notfound__action">
+          <a class="btn btn--ghost" href="/en/">{ui.notfound_home.en}</a>
+        </p>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  /* 色・余白・文字サイズは global.css の :root トークンだけを使います。 */
+  .notfound {
+    display: flex;
+    align-items: center;
+    /* 短いページなので、画面の高さの中央あたりに置きます */
+    min-height: 100dvh;
+    padding-block: var(--space-2xl);
+  }
+
+  .notfound__inner {
+    max-width: var(--measure);
+  }
+
+  /* 「404」は飾りです。中身（見出しと本文）より先に読ませたくないので小さく。 */
+  .notfound__code {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .notfound__title {
+    margin-top: var(--space-2xs);
+    font-size: var(--font-size-2xl);
+  }
+
+  .notfound__body {
+    margin-top: var(--space-sm);
+    color: var(--color-text-muted);
+    line-height: var(--leading-prose);
+    letter-spacing: var(--tracking-ja);
+  }
+
+  .notfound__action {
+    margin-top: var(--space-md);
+  }
+
+  .notfound__rule {
+    margin-block: var(--space-xl);
+  }
+</style>

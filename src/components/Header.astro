@@ -1,0 +1,241 @@
+---
+/**
+ * Header.astro — 全ページ共通のヘッダー（追従型）
+ *
+ * ・氏名（ブランド）/ ナビ5項目 / 言語切り替え を出します。
+ * ・狭い画面ではナビをたたみ、#nav-toggle で開閉します。
+ *   開閉そのものの JS は BaseLayout.astro に入っています。
+ *   ここが提供するのは JS が触る「約束事」だけです:
+ *     - button#nav-toggle[aria-expanded][aria-controls="site-nav"]
+ *     - nav#site-nav（開いているときは .is-open が付く）
+ *     - a.site-nav__link（現在地には .is-active が付く）
+ * ・JS が無くてもナビは普通のページ内リンクとして機能します。
+ *   狭い画面のたたみ込みは JS 前提の機能なので、JS が無いときは
+ *   BaseLayout.astro の <noscript> がナビを常設表示に戻し、
+ *   何も起きないハンバーガーボタンを消します。
+ *
+ * 使い方:  <Header lang="ja" />
+ */
+import type { Lang } from '../i18n/ui';
+import { t } from '../i18n/ui';
+import { profile } from '../data/profile';
+import Icon from './Icon.astro';
+import LangSwitch from './LangSwitch.astro';
+
+export interface Props {
+  /** いま表示しているページの言語。 */
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+
+// ロゴ（氏名）を押したときの戻り先。base: '/' 前提の絶対パス。
+const homeHref = lang === 'en' ? '/en/' : '/';
+
+// ナビ項目。href はページ内アンカーなので日英どちらのページでもそのまま使えます。
+// 遷移先の id は各セクション（HomeSections 側）の #about … #contact と対応します。
+const navItems = [
+  { href: '#about', label: tr('nav_about') },
+  { href: '#research', label: tr('nav_research') },
+  { href: '#publications', label: tr('nav_publications') },
+  { href: '#cv', label: tr('nav_cv') },
+  { href: '#contact', label: tr('nav_contact') },
+];
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="site-header__brand" href={homeHref}>{profile.name[lang]}</a>
+
+    <button
+      class="nav-toggle"
+      id="nav-toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="site-nav"
+    >
+      <span class="nav-toggle__icon nav-toggle__icon--menu"><Icon name="menu" /></span>
+      <span class="nav-toggle__icon nav-toggle__icon--close"><Icon name="close" /></span>
+      <span class="visually-hidden">{tr('nav_menu_label')}</span>
+    </button>
+
+    <nav class="site-nav" id="site-nav" aria-label={tr('nav_menu_label')}>
+      <ul class="site-nav__list">
+        {
+          navItems.map((item) => (
+            <li class="site-nav__item">
+              <a class="site-nav__link" href={item.href}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <LangSwitch lang={lang} />
+  </div>
+</header>
+
+<style>
+  /* トークンは global.css の :root にあるものだけを使います（ここでは再定義しない）。 */
+
+  /* --- 外枠（追従）------------------------------------------------------ */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background-color: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: var(--header-height);
+  }
+
+  /* --- 氏名 -------------------------------------------------------------- */
+  .site-header__brand {
+    /* 残りの要素をすべて右端へ寄せる */
+    margin-inline-end: auto;
+    color: var(--color-heading);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    letter-spacing: var(--tracking-tight);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--transition-fast);
+  }
+
+  .site-header__brand:hover {
+    color: var(--color-accent);
+  }
+
+  /* --- ハンバーガーボタン（狭い画面のみ）-------------------------------- */
+  .nav-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    transition: background-color var(--transition-fast), border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .nav-toggle:hover {
+    background-color: var(--color-accent-soft);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* 閉じている時は「≡」、開いている時は「×」。
+     aria-expanded は BaseLayout.astro の JS が書き換えるので、
+     見た目の状態は常に支援技術に伝わる状態と一致します。 */
+  .nav-toggle__icon {
+    display: inline-flex;
+  }
+
+  .nav-toggle__icon--close {
+    display: none;
+  }
+
+  .nav-toggle[aria-expanded='true'] .nav-toggle__icon--menu {
+    display: none;
+  }
+
+  .nav-toggle[aria-expanded='true'] .nav-toggle__icon--close {
+    display: inline-flex;
+  }
+
+  /* --- ナビ（狭い画面: ヘッダー直下に降りてくるパネル）------------------
+     absolute にして flex の流れから外すため、開いても言語切り替えの
+     位置がずれません。位置の基準は position: sticky な .site-header です。 */
+  .site-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    background-color: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md);
+  }
+
+  .site-nav.is-open {
+    display: block;
+  }
+
+  .site-nav__list {
+    display: flex;
+    flex-direction: column;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding: var(--space-2xs) var(--container-pad) var(--space-sm);
+  }
+
+  .site-nav__link {
+    display: block;
+    padding-block: var(--space-2xs);
+    color: var(--color-text);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    letter-spacing: var(--tracking-normal);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  .site-nav__link:hover {
+    color: var(--color-accent);
+  }
+
+  /* global.css の .is-active より詳細度を上げて確実に効かせる */
+  .site-nav__link.is-active {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  /* --- ナビ（48em 以上: 横並びに戻す）----------------------------------- */
+  @media (min-width: 48em) {
+    .nav-toggle {
+      display: none;
+    }
+
+    .site-nav {
+      display: block;
+      position: static;
+      background: none;
+      border-bottom: 0;
+      box-shadow: none;
+    }
+
+    .site-nav__list {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-md);
+      max-width: none;
+      margin-inline: 0;
+      padding: 0;
+    }
+
+    .site-nav__link {
+      position: relative;
+      padding-block: 0;
+    }
+
+    /* 現在地は下線1本だけで示す（静かなアカデミック寄りの見た目） */
+    .site-nav__link.is-active::after {
+      content: '';
+      position: absolute;
+      inset-inline: 0;
+      bottom: -0.4rem;
+      height: 2px;
+      background-color: var(--color-accent);
+    }
+  }
+</style>

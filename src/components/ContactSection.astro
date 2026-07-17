@@ -1,0 +1,206 @@
+---
+/**
+ * ContactSection.astro — 連絡先
+ *
+ * ・メールは本物の <a href="mailto:…"> です。JS を切っていても
+ *   アドレスは画面に出ますし、クリックでメーラーも開きます。
+ * ・「アドレスをコピー」ボタン(#copy-email)は、あくまで“あると便利”な飾りです。
+ *   実際の処理は BaseLayout.astro の <script> にあり、
+ *   data-email / data-copied-label をここから受け取ります。
+ *   クリップボードが使えない環境では、そちらのスクリプトがボタンを隠します。
+ *   ※ スクリプトはボタンの textContent を差し替えて戻すので、
+ *     このボタンの中身は「文字だけ」にしてください（アイコンを入れると消えます）。
+ *
+ * 使い方:  <ContactSection lang="ja" />
+ */
+import Icon from './Icon.astro';
+import { t, type Lang } from '../i18n/ui';
+import { profile, pick } from '../data/profile';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+
+const email = profile.email;
+const mailtoHref = `mailto:${email}`;
+
+// 所在地。空文字にすると行ごと消えます。
+const location = pick(profile.location, lang).trim();
+
+// profile.ts でリンクを全部消しても崩れないように
+const links = profile.links ?? [];
+---
+
+<section class="section" id="contact">
+  <div class="container">
+    <h2 class="section__title">{tr('section_contact')}</h2>
+
+    <p class="contact__intro">{tr('contact_intro')}</p>
+
+    <p class="contact__email">
+      <a class="btn btn--primary" href={mailtoHref}>
+        <Icon name="mail" />
+        <span class="visually-hidden">{tr('email_label')}</span>
+        <span class="contact__address">{email}</span>
+      </a>
+    </p>
+
+    <button
+      class="btn btn--ghost"
+      id="copy-email"
+      type="button"
+      hidden
+      data-email={email}
+      data-copied-label={tr('copied')}>{tr('copy_email')}</button>
+
+    {location && <p class="contact__location muted">{location}</p>}
+
+    {
+      links.length > 0 && (
+        <ul class="social social--lg">
+          {links.map((link) => (
+            <li>
+              <a class="social__link" href={link.url} target="_blank" rel="me noopener noreferrer">
+                <Icon name={link.icon} />
+                <span class="visually-hidden">{link.name}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  /* --- セクションの外枠（他セクションと共通の見た目）--------------------- */
+  .section {
+    padding-block: var(--space-2xl);
+  }
+
+  .section__title {
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-2xl);
+  }
+
+  /* --- 導入文 ------------------------------------------------------------ */
+  .contact__intro {
+    max-width: var(--measure);
+    font-size: var(--font-size-lg);
+    line-height: var(--leading-prose);
+    letter-spacing: var(--tracking-ja);
+  }
+
+  /* --- メール（本物の mailto: リンク）------------------------------------
+     狭い画面ではボタンを縦に積み、広い画面では横に並べます。
+     .contact__email と #copy-email は隣り合う兄弟なので、間隔は margin で作ります
+     （compressHTML:'jsx' が要素間の空白を消すため、空白には頼れません）。 */
+  .contact__email {
+    margin-top: var(--space-lg);
+  }
+
+  .contact__email .btn {
+    max-width: 100%;
+  }
+
+  /* メールアドレスは長いので、狭い画面では折り返す */
+  .contact__address {
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #copy-email {
+    margin-top: var(--space-2xs);
+  }
+
+  /* --- 所在地 ------------------------------------------------------------
+     ボタン類の下に1行だけ。block なので、横並びのボタンから改行して始まります。 */
+  .contact__location {
+    margin-top: var(--space-sm);
+    font-size: var(--font-size-sm);
+    letter-spacing: var(--tracking-ja);
+  }
+
+  /* --- ソーシャルリンク --------------------------------------------------
+     アイコンは装飾（aria-hidden）なので、名前は .visually-hidden で読み上げに残します。 */
+  .social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-top: var(--space-xl);
+  }
+
+  .social__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast), border-color var(--transition-fast),
+      background-color var(--transition-fast);
+  }
+
+  .social__link:hover {
+    background-color: var(--color-accent-soft);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .social--lg {
+    gap: var(--space-xs);
+  }
+
+  .social--lg .social__link {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .social--lg :global(.icon) {
+    width: 1.375em;
+    height: 1.375em;
+  }
+
+  @media (min-width: 40em) {
+    .contact__email {
+      display: inline-block;
+      vertical-align: top;
+      margin-inline-end: var(--space-2xs);
+    }
+
+    #copy-email {
+      vertical-align: top;
+      margin-top: var(--space-lg);
+    }
+  }
+
+  /* --- 印刷 --------------------------------------------------------------
+     global.css は印刷時に .btn を全部消します（画面用の飾りなので当然）。
+     ただしメールアドレスは「連絡先」という中身そのものなので、
+     ここだけ素のテキストとして残します。 */
+  @media print {
+    .contact__email {
+      display: block;
+      margin-top: var(--space-sm);
+    }
+
+    .contact__email .btn {
+      display: inline !important;
+      padding: 0;
+      border: 0;
+      background: none !important;
+      color: #000000 !important;
+      font-weight: 400;
+    }
+
+    .contact__email :global(.icon) {
+      display: none;
+    }
+  }
+</style>

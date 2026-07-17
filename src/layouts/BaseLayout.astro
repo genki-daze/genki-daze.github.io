@@ -1,0 +1,270 @@
+---
+/**
+ * BaseLayout.astro — 全ページ共通の外枠
+ *
+ * ・<html lang> / meta / OGP / canonical / hreflang を出します。
+ * ・global.css と KaTeX の CSS を読み込みます（CDN は使いません。全部ローカル）。
+ * ・サイト共通の <script>（ナビ開閉・現在地ハイライト・メールコピー）もここです。
+ *
+ * 使い方:
+ *   <BaseLayout lang="ja" title="…" description="…">
+ *     …ページの中身…
+ *   </BaseLayout>
+ */
+import '../styles/global.css';
+import 'katex/dist/katex.min.css';
+
+import type { Lang } from '../i18n/ui';
+import { profile } from '../data/profile';
+
+export interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+}
+
+const { lang, title, description } = Astro.props;
+
+// astro.config.mjs の `site`。未設定でもビルドが落ちないように保険をかけます。
+const site = Astro.site ?? new URL('https://example.com');
+
+const canonicalURL = new URL(Astro.url.pathname, site);
+const jaURL = new URL('/', site);
+const enURL = new URL('/en/', site);
+
+// OGP 画像。TODO(user): 1200x630 の PNG を public/og.png に置いて '/og.png' にすると
+// SNS でのカード表示がきれいになります（SVG はほとんどの SNS で無視されます）。
+const ogImageURL = new URL(profile.photo, site);
+
+const siteName = profile.name[lang];
+const ogLocale = lang === 'ja' ? 'ja_JP' : 'en_US';
+const ogLocaleAlt = lang === 'ja' ? 'en_US' : 'ja_JP';
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={siteName} />
+
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {/* 日本語版 '/' と英語版 '/en/'。x-default は日本語版に向けます。 */}
+    <link rel="alternate" hreflang="ja" href={jaURL} />
+    <link rel="alternate" hreflang="en" href={enURL} />
+    <link rel="alternate" hreflang="x-default" href={jaURL} />
+
+    {/* ブラウザのUI色をトークンに合わせる（global.css の --color-bg と同じ値） */}
+    <meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#101216" media="(prefers-color-scheme: dark)" />
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={ogLocaleAlt} />
+
+    {/* Twitter / X */}
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    {/*
+      JS が無効なときの保険。
+      狭い画面のナビは「たたんで #nav-toggle で開く」形ですが、その開閉は JS の担当です。
+      JS が無いとボタンは何もできないので、ボタンを消してナビを開いたまま固定します
+      （リンクは元から普通のページ内アンカーなので、これだけで全項目に飛べます）。
+    */}
+    <noscript>
+      <style>
+        /* 48em 以上のナビは元から常時表示なので、直すのは狭い画面だけです。 */
+        @media (max-width: 47.999em) {
+          .site-header__inner {
+            flex-wrap: wrap !important;
+          }
+          /* たたんだパネルではなく、ヘッダー内に折り返して常設する */
+          .site-nav {
+            display: block !important;
+            position: static !important;
+            flex-basis: 100% !important;
+            background: none !important;
+            border-bottom: 0 !important;
+            box-shadow: none !important;
+          }
+          /* .container の内側に入るので、パネル用の内側余白は消す */
+          .site-nav__list {
+            padding-inline: 0 !important;
+          }
+          /* 押しても何も起きないボタンは出さない */
+          .nav-toggle {
+            display: none !important;
+          }
+        }
+      </style>
+    </noscript>
+  </head>
+
+  <body class="site">
+    <slot />
+
+    <script>
+      // ------------------------------------------------------------------
+      // サイト共通の JS。ここにあるのは「あると少し便利」な機能だけです。
+      // JS を切っていてもサイトは全部読めます（リンクは実リンク、メールは mailto:）。
+      // ------------------------------------------------------------------
+
+      // 1) ハンバーガーメニューの開閉 -------------------------------------
+      (() => {
+        const toggle = document.getElementById('nav-toggle');
+        const nav = document.getElementById('site-nav');
+        if (!toggle || !nav) return;
+
+        const setOpen = (open: boolean) => {
+          nav.classList.toggle('is-open', open);
+          toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+
+        // 初期状態を DOM に合わせる
+        setOpen(nav.classList.contains('is-open'));
+
+        toggle.addEventListener('click', () => {
+          setOpen(!nav.classList.contains('is-open'));
+        });
+
+        // ナビ内のリンクを踏んだら閉じる
+        nav.addEventListener('click', (event) => {
+          const target = event.target;
+          if (target instanceof Element && target.closest('a')) setOpen(false);
+        });
+
+        // Escape で閉じてボタンにフォーカスを戻す
+        document.addEventListener('keydown', (event) => {
+          if (event.key !== 'Escape') return;
+          if (!nav.classList.contains('is-open')) return;
+          setOpen(false);
+          toggle.focus();
+        });
+
+        // 画面がブレークポイント(48em)より広くなったら閉じる
+        const wide = window.matchMedia('(min-width: 48em)');
+        const onWideChange = (event: MediaQueryListEvent) => {
+          if (event.matches) setOpen(false);
+        };
+        if (typeof wide.addEventListener === 'function') {
+          wide.addEventListener('change', onWideChange);
+        }
+      })();
+
+      // 2) 現在地のハイライト（スクロールスパイ） -------------------------
+      (() => {
+        if (!('IntersectionObserver' in window)) return;
+
+        const links = document.querySelectorAll('.site-nav__link');
+        if (!links.length) return;
+
+        // セクション要素 -> 対応するナビリンク
+        const sections = new Map<Element, Element>();
+
+        links.forEach((link) => {
+          const href = link.getAttribute('href');
+          if (!href) return;
+          const hashAt = href.indexOf('#');
+          if (hashAt === -1) return;
+          const hash = href.slice(hashAt);
+          if (hash.length < 2) return;
+          const section = document.querySelector(hash);
+          if (section) sections.set(section, link);
+        });
+
+        if (!sections.size) return;
+
+        // いま画面に入っているセクション
+        const visible = new Set<Element>();
+
+        const setActive = () => {
+          let best: Element | null = null;
+          visible.forEach((section) => {
+            if (!best || section.getBoundingClientRect().top < best.getBoundingClientRect().top) {
+              best = section;
+            }
+          });
+
+          sections.forEach((link) => {
+            link.classList.remove('is-active');
+            link.removeAttribute('aria-current');
+          });
+
+          if (!best) return;
+          const link = sections.get(best);
+          if (!link) return;
+          link.classList.add('is-active');
+          link.setAttribute('aria-current', 'location');
+        };
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) visible.add(entry.target);
+              else visible.delete(entry.target);
+            });
+            setActive();
+          },
+          // 上はヘッダーの高さ分、下は 55% 削る。画面の上寄りにある見出しが選ばれる。
+          { rootMargin: '-72px 0px -55% 0px', threshold: 0 },
+        );
+
+        sections.forEach((_link, section) => observer.observe(section));
+      })();
+
+      // 3) メールアドレスのコピー ----------------------------------------
+      (() => {
+        const button = document.getElementById('copy-email');
+        if (!button) return;
+
+        const email = button.dataset.email;
+        const copiedLabel = button.dataset.copiedLabel;
+
+        const supported =
+          typeof navigator.clipboard === 'object' &&
+          navigator.clipboard !== null &&
+          typeof navigator.clipboard.writeText === 'function';
+
+        // ボタンは hidden で出力されています。クリップボードが使える環境でだけ出す。
+        // （使えない環境・JS を切っている環境では、隣の mailto: リンクが残るので
+        //   機能は失われません。）
+        if (!supported || !email) return;
+        button.hidden = false;
+
+        const originalLabel = button.textContent;
+        let timer: number | undefined;
+
+        button.addEventListener('click', () => {
+          navigator.clipboard.writeText(email).then(
+            () => {
+              if (copiedLabel) button.textContent = copiedLabel;
+              window.clearTimeout(timer);
+              timer = window.setTimeout(() => {
+                button.textContent = originalLabel;
+              }, 1500);
+            },
+            () => {
+              // コピーに失敗しても何もしない（mailto: リンクが残っている）
+            },
+          );
+        });
+      })();
+    </script>
+  </body>
+</html>

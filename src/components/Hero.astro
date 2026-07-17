@@ -1,0 +1,229 @@
+---
+/**
+ * Hero.astro — トップの自己紹介ブロック
+ *
+ * 使い方:  <Hero lang="ja" />
+ *
+ * ・表示する内容は src/data/profile.ts、文言は src/i18n/ui.ts から来ます。
+ *   このファイルに日本語・英語を直接書かないでください（片方の言語が壊れます）。
+ * ・「CV (PDF)」ボタンは profile.cvPdf が空文字の間は表示しません。
+ * ・クラス名は SPEC §6 の DOM 契約です。名前を変えると他のCSS/JSが動かなくなります。
+ */
+import { t, type Lang } from '../i18n/ui';
+import { profile, pick } from '../data/profile';
+import Icon from './Icon.astro';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+
+const name = pick(profile.name, lang);
+const nameReading = pick(profile.nameReading, lang).trim();
+
+// 読みは空のとき、および氏名とまったく同じとき（＝情報が増えないとき）は出しません。
+const showReading = nameReading !== '' && nameReading !== name;
+
+// 研究室名。空文字にすると行ごと消えます。
+const lab = pick(profile.lab, lang).trim();
+
+// 任意項目は必ずガードする（未設定でもレイアウトが崩れないように）
+const interests = profile.interests ?? [];
+const links = profile.links ?? [];
+const cvPdf = profile.cvPdf?.trim() ?? '';
+const photo = profile.photo?.trim() ?? '';
+---
+
+<section class="hero" id="hero">
+  <div class="container hero__inner">
+    {
+      photo && (
+        <img
+          class="hero__photo"
+          src={photo}
+          alt={name}
+          width="240"
+          height="240"
+          decoding="async"
+          fetchpriority="high"
+        />
+      )
+    }
+
+    <div class="hero__body">
+      <p class="hero__eyebrow">{pick(profile.affiliation, lang)}</p>
+      {lab && <p class="hero__eyebrow hero__eyebrow--lab">{lab}</p>}
+
+      <h1 class="hero__name">
+        {name}{' '}
+        {showReading && <span class="hero__reading">{nameReading}</span>}
+      </h1>
+
+      <p class="hero__tagline">{pick(profile.tagline, lang)}</p>
+
+      {
+        interests.length > 0 && (
+          <ul class="hero__interests" aria-label={tr('interests_label')}>
+            {interests.map((interest) => (
+              <li class="tag">{pick(interest, lang)}</li>
+            ))}
+          </ul>
+        )
+      }
+
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="#contact">{tr('hero_cta_contact')}</a>
+        {cvPdf && <a class="btn btn--ghost" href={cvPdf}>{tr('hero_cta_cv')}</a>}
+      </div>
+
+      {
+        links.length > 0 && (
+          <ul class="social">
+            {links.map((link) => (
+              <li>
+                <a class="social__link" href={link.url} rel="me noopener" target="_blank">
+                  <Icon name={link.icon} />
+                  <span class="visually-hidden">{link.name}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ------------------------------------------------------------------------
+     .hero — 狭い画面では縦積み、48em 以上で「写真 | 本文」の2カラム。
+     色・余白・文字サイズは global.css の :root トークンだけを使います。
+     ------------------------------------------------------------------------ */
+  .hero {
+    padding-block: var(--space-2xl) var(--space-xl);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: var(--space-md);
+    justify-items: start;
+  }
+
+  .hero__photo {
+    width: 7.5rem;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    object-fit: cover;
+  }
+
+  /* --- 本文側 ------------------------------------------------------------ */
+  .hero__eyebrow {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ja);
+  }
+
+  /* 所属の2行目（研究室・指導教員）。1行目とくっつけて1ブロックに見せます。 */
+  .hero__eyebrow--lab {
+    margin-top: var(--space-3xs);
+  }
+
+  .hero__name {
+    margin-top: var(--space-2xs);
+    font-size: var(--font-size-3xl);
+  }
+
+  /* 読み（ふりがな / ローマ字）。氏名の下に小さく置きます。 */
+  .hero__reading {
+    display: block;
+    margin-top: var(--space-3xs);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .hero__tagline {
+    max-width: var(--measure);
+    margin-top: var(--space-sm);
+    font-size: var(--font-size-lg);
+    line-height: var(--leading-prose);
+    letter-spacing: var(--tracking-ja);
+  }
+
+  /* --- 関心分野のタグ ---------------------------------------------------- */
+  .hero__interests {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-top: var(--space-md);
+  }
+
+  /* --- ボタン ------------------------------------------------------------ */
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-top: var(--space-md);
+  }
+
+  /* --- ソーシャルリンク --------------------------------------------------- */
+  .social {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3xs);
+    margin-top: var(--space-md);
+    margin-inline-start: -0.5rem; /* アイコンの余白ぶんを戻して本文と左端を揃える */
+  }
+
+  .social__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  .social__link:hover {
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  /* Icon.astro が出す <svg> は子コンポーネント側の要素なので :global が要ります。 */
+  .social__link :global(.icon) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* ------------------------------------------------------------------------
+     48em 以上: 写真を左、本文を右に。
+     ------------------------------------------------------------------------ */
+  @media (min-width: 48em) {
+    .hero {
+      padding-block: var(--space-3xl) var(--space-2xl);
+    }
+
+    .hero__inner {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: var(--space-xl);
+    }
+
+    .hero__photo {
+      width: 10rem;
+    }
+  }
+</style>

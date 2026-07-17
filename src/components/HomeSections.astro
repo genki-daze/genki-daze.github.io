@@ -1,0 +1,211 @@
+---
+/**
+ * HomeSections.astro — トップページの中身まるごと
+ *
+ * 日本語版（src/pages/index.astro）と英語版（src/pages/en/index.astro）は、
+ * 言語が違うだけで構造は完全に同じです。両方に同じものを書くと必ず片方だけ古くなるので、
+ * 中身はこのファイル1枚にまとめ、ページ側は lang を渡すだけにしています。
+ *
+ * 使い方:  <HomeSections lang="ja" />
+ *
+ * ここが持っているもの（SPEC §6 の DOM 契約）:
+ *   a.skip-link  →  header.site-header  →  main.main#main  →  footer.site-footer
+ *
+ * セクションの並び（この順番も契約です）:
+ *   Hero → About → Research → Publications → CV → Contact
+ *
+ * 背景色の交互（.section / .section--alt）は各セクションが自分で持っています:
+ *   about = .section / research = .section--alt / publications = .section /
+ *   cv = .section--alt / contact = .section
+ * ここで足せるのは About だけです（About は専用コンポーネントを持たず、
+ * src/content/about/{ja,en}.md の本文をそのまま出すだけなので）。
+ *
+ * 文言はすべて src/i18n/ui.ts の t(lang) 経由です。ここに日本語・英語を直接書かないこと。
+ */
+import { getCollection, render } from 'astro:content';
+
+import Header from './Header.astro';
+import Hero from './Hero.astro';
+import ResearchSection from './ResearchSection.astro';
+import PublicationsSection from './PublicationsSection.astro';
+import CVSection from './CVSection.astro';
+import ContactSection from './ContactSection.astro';
+import Icon from './Icon.astro';
+import { profile } from '../data/profile';
+import { t, type Lang } from '../i18n/ui';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+
+// About の本文。about コレクションは src/content/about/*.md を読むので、
+// id は 'ja' / 'en' になります（= そのまま lang で引けます）。
+// 本文は render() で描画します。こうしないと $…$ の数式が KaTeX で組版されません。
+const aboutEntry = (await getCollection('about')).find((entry) => entry.id === lang);
+const AboutContent = aboutEntry ? (await render(aboutEntry)).Content : null;
+
+// フッターの年月日はビルド時刻です（= 最後にサイトを更新した日）。
+// 表示は YYYY-MM-DD 固定。日英どちらで読んでも誤解が無い形にしています。
+const now = new Date();
+const year = now.getFullYear();
+const updatedISO = now.toISOString().slice(0, 10);
+---
+
+<a class="skip-link" href="#main">{tr('skip_to_content')}</a>
+
+<Header lang={lang} />
+
+<main class="main" id="main">
+  <Hero lang={lang} />
+
+  {/* --- About: 本文は src/content/about/{ja,en}.md ------------------------ */}
+  <section class="section" id="about">
+    <div class="container">
+      <h2 class="section__title">{tr('section_about')}</h2>
+
+      {
+        AboutContent ? (
+          <div class="section__body prose">
+            <AboutContent />
+          </div>
+        ) : (
+          <p class="muted">{tr('empty_state')}</p>
+        )
+      }
+    </div>
+  </section>
+
+  <ResearchSection lang={lang} />
+
+  <PublicationsSection lang={lang} />
+
+  <CVSection lang={lang} />
+
+  <ContactSection lang={lang} />
+</main>
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p class="site-footer__copy">{`© ${year} ${profile.name[lang]}`}</p>
+
+    <p class="site-footer__meta">
+      {tr('footer_built_with')}{' · '}{tr('last_updated')}{' '}
+      <time datetime={updatedISO}>{updatedISO}</time>
+    </p>
+
+    <a class="to-top" href="#hero">
+      <Icon name="arrow-up" />
+      {tr('back_to_top')}
+    </a>
+  </div>
+</footer>
+
+<style>
+  /* ------------------------------------------------------------------------
+     色・余白・文字サイズは global.css の :root トークンだけを使います。
+     ここでトークンを定義し直さないでください。
+     ------------------------------------------------------------------------ */
+
+  /* --- 本文へスキップ -----------------------------------------------------
+     キーボードで Tab を1回押した人だけに見えるリンクです。
+     普段は画面の上へ追い出しておき、フォーカスが来たら降りてきます
+     （display: none にすると、そもそもフォーカスできず意味が無くなります）。 */
+  .skip-link {
+    position: absolute;
+    top: var(--space-2xs);
+    left: var(--space-2xs);
+    z-index: var(--z-skip);
+    padding: 0.6rem 1rem;
+    background-color: var(--color-accent);
+    border-radius: var(--radius-md);
+    color: var(--color-accent-contrast);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+    /* 画面の外（上）へ。transition は付けません（motion 設定に関係なく一瞬で出す） */
+    transform: translateY(-250%);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
+  /* --- About --------------------------------------------------------------
+     .section / .section__title は「見出し付きセクション」共通の見た目です。
+     PublicationsSection / CVSection / ContactSection と同じ値に揃えてあります
+     （global.css のユーティリティには含まれていないため、各セクションが自分で持ちます）。 */
+  .section {
+    padding-block: var(--space-2xl);
+  }
+
+  .section__title {
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-2xl);
+  }
+
+  /* About の本文（.section__body）そのものにはスタイルを当てていません。
+     行間・1行の長さ・見出しなど、中身のタイポグラフィは global.css の .prose が
+     すべて持っています。描画された Markdown にはこのコンポーネントのスコープが
+     付かないため、ここで子孫セレクタ（.section__body p など）を書いても当たりません。 */
+
+  /* --- フッター ----------------------------------------------------------- */
+  .site-footer {
+    padding-block: var(--space-lg);
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* 狭い画面は縦積み、40em 以上で「著作権表示 … ページ先頭へ」の横並び。 */
+  .site-footer__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .site-footer__copy {
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+  }
+
+  .site-footer__meta {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .to-top {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 0.4em;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+
+  .to-top:hover {
+    color: var(--color-accent);
+  }
+
+  .to-top :global(.icon) {
+    width: 1em;
+    height: 1em;
+  }
+
+  @media (min-width: 40em) {
+    .site-footer__inner {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: var(--space-md);
+    }
+
+    /* 「ページ先頭へ」だけを右端へ */
+    .to-top {
+      margin-inline-start: auto;
+    }
+  }
+</style>

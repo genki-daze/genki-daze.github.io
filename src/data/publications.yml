@@ -1,0 +1,118 @@
+# 業績一覧
+#
+# 書き方のルール:
+#   id     … ファイル内で重複しない好きな文字列（英数字とハイフン推奨）。必須。
+#   type   … journal / preprint / intl_conf / domestic_conf / poster / thesis のいずれか
+#            表示はこの順（論文が先、発表が後）。1件も無い種別は見出しごと消えます。
+#   year   … 数字（クォートで囲まない: 2025 は OK、'2025' はエラー）
+#   month  … 1〜12 の数字。省略可
+#   award  … 受賞したものだけ書く。省略可
+#   links  … 無ければ行ごと省略可
+# ja / en は両方必須です（片方だけだとビルドが失敗します）。
+#
+# 著者名のうち profile.name（増田 元希 / Genki Masuda）と一致する部分が自動で太字になります。
+#
+# TODO(user): 国内学会発表の「英語タイトル」と「共著者のローマ字表記」は、
+#             日本語からの下訳です。正式な英語表記を確認して直してください。
+#             （各エントリの該当行に個別の TODO を付けています）
+
+# ---------------- 学術論文 / プレプリント ----------------
+
+- id: lm-qasas-medrxiv-2026
+  type: preprint
+  authors:
+    ja: G. Masuda, Y. Funakoshi, S. Iizumi, et al.
+    en: G. Masuda, Y. Funakoshi, S. Iizumi, et al.
+  title:
+    ja: 'LM-QASAS: Reference-free identification of antigen-specific sequences from the BCR repertoire using antibody language models'
+    en: 'LM-QASAS: Reference-free identification of antigen-specific sequences from the BCR repertoire using antibody language models'
+  venue:
+    ja: medRxiv（プレプリント）
+    en: medRxiv (preprint)
+  # medRxiv の posted date は 2026-04-01（DOI のメタデータで確認済み。
+  # DOI 文字列に含まれる 2026.03.31 は投稿日で、公開日ではありません）
+  year: 2026
+  month: 4
+  links:
+    - label: DOI
+      url: https://doi.org/10.64898/2026.03.31.26349834
+    - label: medRxiv
+      url: https://www.medrxiv.org/content/10.64898/2026.03.31.26349834v1
+
+# ---------------- 国内学会・シンポジウムにおける発表 ----------------
+
+- id: ipsj-sigbio-85-2026
+  type: domestic_conf
+  authors:
+    ja: 増田元希, 大上雅史
+    en: G. Masuda, M. Ohue
+  title:
+    ja: 抗原特異性を獲得する配列条件付き抗体生成モデルの開発
+    # TODO(user): 英訳を確認してください（下訳です）。
+    en: Development of a sequence-conditioned antibody generative model that acquires antigen specificity
+  venue:
+    ja: 情報処理学会 第85回バイオ情報学研究会 (SIGBIO), 沖縄, 2026年7月（口頭発表）
+    en: IPSJ SIG Bioinformatics (SIGBIO), 85th Meeting, Okinawa, Japan, July 2026 (Oral)
+  year: 2026
+  month: 7
+
+- id: ipsj-sigbio-84-2026
+  type: domestic_conf
+  authors:
+    ja: 増田元希, 船越洋平, 薬師神公和, 他
+    # ローマ字表記は LM-QASAS の著者リスト（Kimikazu Yakushijin）で確認済み。
+    en: G. Masuda, Y. Funakoshi, K. Yakushijin, et al.
+  title:
+    ja: 抗原プロンプトに基づく抗体言語モデル生成配列を用いた抗原特異的免疫応答の評価
+    # TODO(user): 英訳を確認してください（下訳です）。
+    en: Evaluation of antigen-specific immune responses using antibody language model-generated sequences based on antigen prompts
+  venue:
+    ja: 情報処理学会 第84回バイオ情報学研究会 (SIGBIO), 石川, 2026年3月（口頭発表）
+    en: IPSJ SIG Bioinformatics (SIGBIO), 84th Meeting, Ishikawa, Japan, March 2026 (Oral)
+  year: 2026
+  month: 3
+
+- id: tbm-9th-2025
+  type: domestic_conf
+  authors:
+    ja: 増田元希, 船越洋平, 飯棲俊介, 他
+    en: G. Masuda, Y. Funakoshi, S. Iizumi, et al.
+  title:
+    ja: 機械学習によるBCRレパトア由来の抗原特異的抗体配列の推定
+    # TODO(user): 英訳を確認してください（下訳です）。
+    en: Estimation of antigen-specific antibody sequences from BCR repertoires using machine learning
+  venue:
+    ja: Tokyo Bioinformatics Meeting 第9回研究会, 2025年11月（ポスター発表）
+    en: Tokyo Bioinformatics Meeting, 9th Meeting, November 2025 (Poster)
+  year: 2025
+  month: 11
+
+- id: cbi-annual-2025
+  type: domestic_conf
+  authors:
+    ja: G. Masuda, Y. Funakoshi, S. Iizumi, et al.
+    en: G. Masuda, Y. Funakoshi, S. Iizumi, et al.
+  title:
+    ja: Computational Identification of Antigen-Specific Sequences from BCR Repertoires Using an Antibody Language Model
+    en: Computational Identification of Antigen-Specific Sequences from BCR Repertoires Using an Antibody Language Model
+  venue:
+    ja: CBI学会2025年大会, 2025年10月（ポスター発表）
+    en: CBI Society Annual Meeting 2025, October 2025 (Poster)
+  year: 2025
+  month: 10
+
+- id: bioinfo-wakate-17th-2025
+  type: domestic_conf
+  authors:
+    ja: 増田元希, 船越洋平, 飯棲俊介, 他
+    en: G. Masuda, Y. Funakoshi, S. Iizumi, et al.
+  title:
+    ja: 機械学習によるBCRレパトア由来の抗原特異的抗体配列の推定
+    # TODO(user): 英訳を確認してください（下訳です）。
+    en: Estimation of antigen-specific antibody sequences from BCR repertoires using machine learning
+  venue:
+    ja: 第17回生命情報科学若手の会 年会, 兵庫, 2025年9月（ポスター発表）
+    # TODO(user): 「生命情報科学若手の会」の公式英語名称を確認してください（下訳です）。
+    en: 17th Annual Meeting of the Society for Young Researchers in Bioinformatics, Hyogo, Japan, September 2025 (Poster)
+  year: 2025
+  month: 9

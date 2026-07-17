@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-labelledby="profile-placeholder-title">
+  <!-- TODO(user): これは仮のプロフィール画像（シルエット）です。 -->
+  <!-- TODO(user): 自分の顔写真に差し替えてください。public/ フォルダに profile.jpg などを置き、 -->
+  <!-- TODO(user): src/data/profile.ts の photo を '/profile.jpg' に変更します。 -->
+  <!-- TODO(user): 写真を表示したくない場合は photo を '' （空文字）にすると非表示になります。 -->
+  <title id="profile-placeholder-title">プロフィール画像のプレースホルダー / Profile photo placeholder</title>
+  <rect width="240" height="240" fill="#eceefa"/>
+  <circle cx="120" cy="96" r="36" fill="#33408f"/>
+  <path d="M120 140C74 140 36 176 30 220L27 240L213 240L210 220C204 176 166 140 120 140Z" fill="#33408f"/>
+</svg>

@@ -1,0 +1,68 @@
+# 経歴（学歴 / 職歴・研究経験 / 受賞）
+#
+# 書き方のルール:
+#   id      … ファイル内で重複しない文字列。必須。
+#   section … education / experience / award のいずれか
+#   order   … 数字。大きいほど新しい＝上に表示されます。
+#             迷ったら「開始年」を入れておくと自然に並びます（同年は +1 して調整）。
+#   detail  … 補足。不要なら行ごと省略可。
+# ja / en は両方必須です。
+#
+# いま experience（職歴・研究経験）と award（受賞）は1件もありません。
+# 0件のセクションは見出しごと自動で消えるので、このままでも表示は崩れません。
+# インターン・TA・RA・受賞が増えたら、下のテンプレートを参考に追記してください。
+
+# ---------------- 学歴 ----------------
+
+- id: edu-master
+  section: education
+  order: 2025
+  period:
+    ja: 2025年4月 - 現在
+    en: Apr 2025 - Present
+  title:
+    ja: 東京科学大学 情報理工学院 情報工学系 修士課程（工学）
+    en: M.Eng. Program, Department of Computer Science, School of Computing, Institute of Science Tokyo
+  detail:
+    # TODO(user): 修士論文のテーマが決まっていれば書き足してください（未定なら detail ごと削除可）。
+    ja: 大上研究室（Life Intelligence）
+    en: Ohue Laboratory (Life Intelligence)
+
+- id: edu-bachelor
+  section: education
+  order: 2021
+  period:
+    ja: 2021年4月 - 2025年3月
+    en: Apr 2021 - Mar 2025
+  title:
+    ja: 東京工業大学（現・東京科学大学）情報理工学院 情報工学系 学士（工学）
+    en: B.Eng., Department of Computer Science, School of Computing, Tokyo Institute of Technology (now Institute of Science Tokyo)
+
+# ---------------- 職歴・研究経験（現在0件 → セクションごと非表示） ----------------
+#
+# 例:
+# - id: exp-internship
+#   section: experience
+#   order: 2026
+#   period:
+#     ja: 2026年8月 - 2026年9月
+#     en: Aug 2026 - Sep 2026
+#   title:
+#     ja: 〇〇株式会社 研究インターンシップ
+#     en: Research Intern, 〇〇 Inc.
+#   detail:
+#     ja: 〇〇チームで〇〇に従事。
+#     en: Worked on 〇〇 with the 〇〇 team.
+
+# ---------------- 受賞（現在0件 → セクションごと非表示） ----------------
+#
+# 例:
+# - id: award-best-poster
+#   section: award
+#   order: 2026
+#   period:
+#     ja: 2026年3月
+#     en: Mar 2026
+#   title:
+#     ja: 〇〇賞（〇〇学会 第〇回大会）
+#     en: 〇〇 Award, 〇〇 Society 〇th Annual Meeting

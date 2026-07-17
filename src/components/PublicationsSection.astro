@@ -1,0 +1,269 @@
+---
+/**
+ * PublicationsSection.astro — 業績一覧（#publications）
+ *
+ * ・src/data/publications.yml（publications コレクション）を読みます。
+ * ・種別ごとに journal → preprint → intl_conf → domestic_conf → poster → thesis の順で
+ *   グループ化し、1件も無い種別は見出しごと出しません。
+ *   （論文を先、口頭・ポスター発表を後にする学術界の慣習に合わせています）
+ * ・グループ内は「年 → 月」の新しい順です（month は省略可。省略時は同じ年の最後）。
+ * ・著者名のうち自分の名前（profile.name）だけ太字（.pub__me）にします。
+ * ・受賞（award）とリンク（links）は、書かれている業績にだけ表示します。
+ * ・1件も無いときは ui.empty_state を出します。
+ *
+ * 文言はすべて src/i18n/ui.ts 経由です。ここに日本語や英語を直接書かないでください。
+ */
+import { getCollection } from 'astro:content';
+
+import Icon from './Icon.astro';
+import { profile } from '../data/profile';
+import { t, ui } from '../i18n/ui';
+import type { Lang } from '../i18n/ui';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+
+/** 表示順。content.config.ts の type の enum と対応します。 */
+const TYPE_ORDER = ['journal', 'preprint', 'intl_conf', 'domestic_conf', 'poster', 'thesis'] as const;
+
+type PubType = (typeof TYPE_ORDER)[number];
+
+/** 種別 → 見出しの文言キー（ui.ts の pub_* ）。 */
+const TYPE_HEADING: Record<PubType, keyof typeof ui> = {
+  journal: 'pub_journal',
+  intl_conf: 'pub_intl_conf',
+  domestic_conf: 'pub_domestic_conf',
+  preprint: 'pub_preprint',
+  poster: 'pub_poster',
+  thesis: 'pub_thesis',
+};
+
+const publications = await getCollection('publications');
+
+// 年の降順 → 同じ年なら月の降順（month 無しは同じ年の中で最後になります）
+const sorted = [...publications].sort(
+  (a, b) => b.data.year - a.data.year || (b.data.month ?? 0) - (a.data.month ?? 0),
+);
+
+// 空のグループは filter で落とします（見出しだけが残らないように）
+const groups = TYPE_ORDER.map((type) => ({
+  type,
+  heading: tr(TYPE_HEADING[type]),
+  items: sorted.filter((entry) => entry.data.type === type),
+})).filter((group) => group.items.length > 0);
+
+/**
+ * 太字にする自分の名前の候補。
+ * 論文ごとに「増田元希」「G. Masuda」など表記が揺れるため、profile.name だけでは一致しません。
+ * 長いものから照合して、短い表記が先に食ってしまうのを防ぎます。
+ */
+const aliases = (profile.authorAliases?.length ? profile.authorAliases : [profile.name[lang]])
+  .map((a) => a.trim())
+  .filter(Boolean)
+  .sort((a, b) => b.length - a.length);
+
+type AuthorToken = { text: string; isMe: boolean };
+
+/**
+ * 著者名の文字列を「自分の名前」と「それ以外」のトークンに分解します。
+ *   'A, 増田元希, B' -> [{'A, ',false}, {'増田元希',true}, {', B',false}]
+ * set:html は使いません（YAML の中身をそのまま HTML として出さないため）。
+ * テキストとして描画すれば Astro が自動でエスケープします。
+ */
+function tokenizeAuthors(authors: string): AuthorToken[] {
+  if (aliases.length === 0) return [{ text: authors, isMe: false }];
+
+  const tokens: AuthorToken[] = [];
+  let rest = authors;
+
+  while (rest.length > 0) {
+    // 最も手前で一致する表記を探す（同じ位置なら長い方を優先）
+    let hitAt = -1;
+    let hitAlias = '';
+    for (const alias of aliases) {
+      const at = rest.indexOf(alias);
+      if (at === -1) continue;
+      if (hitAt === -1 || at < hitAt || (at === hitAt && alias.length > hitAlias.length)) {
+        hitAt = at;
+        hitAlias = alias;
+      }
+    }
+
+    if (hitAt === -1) {
+      tokens.push({ text: rest, isMe: false });
+      break;
+    }
+    if (hitAt > 0) tokens.push({ text: rest.slice(0, hitAt), isMe: false });
+    tokens.push({ text: hitAlias, isMe: true });
+    rest = rest.slice(hitAt + hitAlias.length);
+  }
+
+  return tokens;
+}
+---
+
+<section class="section" id="publications">
+  <div class="container">
+    <h2 class="section__title">{tr('section_publications')}</h2>
+
+    {
+      groups.length === 0 ? (
+        <p class="muted">{tr('empty_state')}</p>
+      ) : (
+        groups.map((group) => (
+          <div class="pub-group">
+            <h3 class="pub-group__title">{group.heading}</h3>
+            <ol class="pub-list">
+              {group.items.map((entry) => {
+                const authorTokens = tokenizeAuthors(entry.data.authors[lang]);
+                const title = entry.data.title[lang];
+                const award = entry.data.award?.[lang]?.trim();
+                const links = entry.data.links ?? [];
+
+                return (
+                  <li class="pub">
+                    <span class="pub__year">{entry.data.year}</span>
+                    <div class="pub__body">
+                      <p class="pub__authors">
+                        {authorTokens.map((token) =>
+                          token.isMe ? <strong class="pub__me">{token.text}</strong> : token.text,
+                        )}
+                      </p>
+                      <p class="pub__title">{title}</p>
+                      <p class="pub__venue">{entry.data.venue[lang]}</p>
+                      {award && (
+                        <p class="pub__award">
+                          <span class="badge">{award}</span>
+                        </p>
+                      )}
+                      {links.length > 0 && (
+                        <ul class="pub__links">
+                          {links.map((link) => (
+                            <li>
+                              <a class="chip" href={link.url} target="_blank" rel="noopener noreferrer">
+                                <Icon name="external" />
+                                {link.label}
+                                {/* リンク名だけだと読み上げで区別が付かないので、業績名を隠し文字で添えます */}
+                                <span class="visually-hidden">{' '}{title}</span>
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        ))
+      )
+    }
+  </div>
+</section>
+
+<style>
+  /* --- セクションの外枠 ---------------------------------------------------
+     .section / .section__title は「見出し付きセクション」共通の見た目です。
+     global.css のユーティリティには無いので、各セクションが自分の <style> に持ちます。
+     CVSection / ContactSection と同じ値に揃えてあります。 */
+  .section {
+    padding-block: var(--space-2xl);
+  }
+
+  .section__title {
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-2xl);
+  }
+
+  /* --- 種別ごとのグループ ------------------------------------------------- */
+  .pub-group + .pub-group {
+    margin-top: var(--space-xl);
+  }
+
+  .pub-group__title {
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-2xs);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-base);
+    /* 日本語の見出しなので text-transform: uppercase は使いません */
+    letter-spacing: var(--tracking-wide);
+  }
+
+  /* --- 業績リスト --------------------------------------------------------- */
+  .pub-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  /* 狭い画面では「年」が上に積まれます */
+  .pub {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3xs);
+  }
+
+  /* 48em 以上では 2カラム（左が年のガター、右が本体） */
+  @media (min-width: 48em) {
+    .pub {
+      grid-template-columns: 4rem 1fr;
+      gap: var(--space-md);
+      align-items: baseline;
+    }
+  }
+
+  .pub__year {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-wide);
+    line-height: var(--leading-snug);
+  }
+
+  .pub__body > * + * {
+    margin-top: var(--space-3xs);
+  }
+
+  .pub__body > .pub__award,
+  .pub__body > .pub__links {
+    margin-top: var(--space-2xs);
+  }
+
+  .pub__authors {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-snug);
+  }
+
+  /* 自分の名前だけ本文色 + 太字にして、共著者から浮かせます */
+  .pub__me {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  .pub__title {
+    color: var(--color-heading);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-ja);
+  }
+
+  .pub__venue {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-snug);
+  }
+
+  /* --- リンク（.chip は global.css のユーティリティ）---------------------- */
+  .pub__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+</style>

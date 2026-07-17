@@ -1,0 +1,22 @@
+---
+/**
+ * en/index.astro — 英語版のトップページ（'/en/'）
+ *
+ * 日本語版（src/pages/index.astro）と対になるファイルです。
+ * 中身は HomeSections.astro が共通で持っているので、ここは lang='en' を渡すだけです。
+ * 英語の文章そのものは src/content/about/en.md, src/content/research/en/*.md、
+ * および src/data/*.yml / profile.ts の en: フィールドにあります。
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HomeSections from '../../components/HomeSections.astro';
+import { profile } from '../../data/profile';
+
+const lang = 'en' as const;
+
+const title = `${profile.name.en} | ${profile.affiliation.en}`;
+const description = `${profile.name.en} — ${profile.affiliation.en}. ${profile.tagline.en}`;
+---
+
+<BaseLayout lang={lang} title={title} description={description}>
+  <HomeSections lang={lang} />
+</BaseLayout>

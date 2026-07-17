@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="M">
+  <!-- TODO(user): 好きなアイコンに差し替えてOKです。文字を変えるなら下の <text> の中身（M）を直してください。 -->
+  <rect width="64" height="64" rx="12" fill="#33408f"/>
+  <text
+    x="32"
+    y="33"
+    fill="#ffffff"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif"
+    font-size="36"
+    font-weight="600"
+    text-anchor="middle"
+    dominant-baseline="central">M</text>
+</svg>

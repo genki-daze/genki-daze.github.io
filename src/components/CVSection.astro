@@ -1,0 +1,211 @@
+---
+/**
+ * CVSection.astro — 経歴（学歴 / 職歴・研究経験 / 受賞）とスキル
+ *
+ * 表示するデータ:
+ *   ・src/data/cv.yml      … cv コレクション。section ごとに order の大きい順（＝新しい順）。
+ *   ・src/data/skills.yml  … skills コレクション。order の小さい順。
+ *
+ * 中身が 0 件のかたまりは、見出しごと表示しません（空の「受賞」が残らないように）。
+ *
+ * 使い方:  <CVSection lang="ja" />
+ */
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { t, type Lang } from '../i18n/ui';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+
+type CvSection = CollectionEntry<'cv'>['data']['section'];
+
+const cvEntries = await getCollection('cv');
+
+// skills は order の小さいものから
+const skillGroups = (await getCollection('skills')).sort((a, b) => a.data.order - b.data.order);
+
+// 表示する順番と見出し。文言は必ず ui.ts 経由（英語版が壊れないように）。
+const blockDefs: { key: CvSection; title: string }[] = [
+  { key: 'education', title: tr('cv_education') },
+  { key: 'experience', title: tr('cv_experience') },
+  { key: 'award', title: tr('cv_awards') },
+];
+
+// section ごとに絞り込み → order の大きい順（＝新しい順）→ 空のかたまりは捨てる
+const blocks = blockDefs
+  .map(({ key, title }) => ({
+    title,
+    items: cvEntries
+      .filter((entry) => entry.data.section === key)
+      .sort((a, b) => b.data.order - a.data.order),
+  }))
+  .filter((block) => block.items.length > 0);
+
+const isEmpty = blocks.length === 0 && skillGroups.length === 0;
+---
+
+<section class="section section--alt" id="cv">
+  <div class="container">
+    <h2 class="section__title">{tr('section_cv')}</h2>
+
+    {isEmpty && <p class="muted">{tr('empty_state')}</p>}
+
+    {
+      blocks.map((block) => (
+        <div class="cv-block">
+          <h3 class="cv-block__title">{block.title}</h3>
+          <ul class="timeline">
+            {block.items.map((entry) => (
+              <li class="timeline__item">
+                <span class="timeline__period">{entry.data.period[lang]}</span>
+                <div class="timeline__body">
+                  <p class="timeline__title">{entry.data.title[lang]}</p>
+                  {entry.data.detail && <p class="timeline__detail">{entry.data.detail[lang]}</p>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+
+    {
+      skillGroups.length > 0 && (
+        <div class="cv-block">
+          <h3 class="cv-block__title">{tr('cv_skills')}</h3>
+          <dl class="skills">
+            {skillGroups.map((group) => (
+              <Fragment>
+                <dt class="skills__category">{group.data.category[lang]}</dt>
+                <dd class="skills__items">
+                  {group.data.items.map((item) => (
+                    <span class="tag tag--sm">{item}</span>
+                  ))}
+                </dd>
+              </Fragment>
+            ))}
+          </dl>
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  /* --- セクションの外枠 --------------------------------------------------
+     .section / .section--alt / .section__title は他セクションと共通の見た目です。
+     トークンは global.css のものだけを使い、ここでは定義しません。 */
+  .section {
+    padding-block: var(--space-2xl);
+  }
+
+  .section--alt {
+    background-color: var(--color-surface-alt);
+    border-block: 1px solid var(--color-border);
+  }
+
+  .section__title {
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-2xl);
+  }
+
+  /* --- かたまり（学歴 / 職歴 / 受賞 / スキル）---------------------------- */
+  .cv-block + .cv-block {
+    margin-top: var(--space-xl);
+  }
+
+  .cv-block__title {
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-2xs);
+    border-bottom: 1px solid var(--color-border-strong);
+    font-size: var(--font-size-lg);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  /* --- 年表 --------------------------------------------------------------
+     狭い画面: 期間 → 内容 の縦積み。
+     広い画面: 左に期間の列、右に内容の2カラム。 */
+  .timeline {
+    display: grid;
+  }
+
+  .timeline__item {
+    display: grid;
+    gap: var(--space-3xs);
+    padding-block: var(--space-sm);
+  }
+
+  .timeline__item + .timeline__item {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .timeline__period {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: var(--tracking-normal);
+    white-space: nowrap;
+  }
+
+  .timeline__title {
+    color: var(--color-heading);
+    font-weight: 600;
+    line-height: var(--leading-snug);
+  }
+
+  .timeline__detail {
+    margin-top: var(--space-3xs);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    line-height: var(--leading-normal);
+    letter-spacing: var(--tracking-ja);
+  }
+
+  /* --- スキル ------------------------------------------------------------ */
+  .skills {
+    display: grid;
+  }
+
+  .skills__category {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    letter-spacing: var(--tracking-normal);
+  }
+
+  .skills__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin-top: var(--space-2xs);
+  }
+
+  /* 次のカテゴリとの間隔（狭い画面のとき） */
+  .skills__items + .skills__category {
+    margin-top: var(--space-md);
+  }
+
+  /* --- 広い画面: 期間 / カテゴリを左の列にそろえる ----------------------- */
+  @media (min-width: 40em) {
+    .timeline__item {
+      grid-template-columns: 11rem 1fr;
+      gap: var(--space-md);
+      align-items: baseline;
+    }
+
+    .skills {
+      grid-template-columns: 11rem 1fr;
+      column-gap: var(--space-md);
+      row-gap: var(--space-sm);
+      align-items: baseline;
+    }
+
+    .skills__items,
+    .skills__items + .skills__category {
+      margin-top: 0;
+    }
+  }
+</style>

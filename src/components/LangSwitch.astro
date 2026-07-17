@@ -1,0 +1,64 @@
+---
+/**
+ * LangSwitch.astro — 日本語 ⇄ English の切り替えリンク
+ *
+ * ・日本語ページ（'/'）では英語版 '/en/' へ、英語ページ（'/en/'）では '/' へ飛びます。
+ *   astro.config.mjs の i18n 設定が prefixDefaultLocale: false なので、
+ *   日本語版は '/en/' のような接頭辞を持ちません。
+ * ・リンク先は astro.config.mjs の `base: '/'` を前提にした絶対パスです。
+ *   base を '/' 以外に変えた場合は、ここの href も直してください。
+ * ・表示される文字（「English」/「日本語」）は i18n/ui.ts の lang_switch_label です。
+ *   リンクの読み上げ名はこの文字そのものになります（切り替え先の言語を、
+ *   その言語自身の表記で示すのが W3C の推奨パターン）。
+ *   lang / hreflang を切り替え先の言語にしておくことで、スクリーンリーダーが
+ *   「English」を英語の発音で読み上げます。
+ */
+import type { Lang } from '../i18n/ui';
+import { t } from '../i18n/ui';
+
+export interface Props {
+  /** いま表示しているページの言語。 */
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+
+// いまの言語の「反対側」へ渡す
+const target: Lang = lang === 'ja' ? 'en' : 'ja';
+const href = target === 'en' ? '/en/' : '/';
+---
+
+<a class="lang-switch" href={href} lang={target} hreflang={target} rel="alternate">
+  {tr('lang_switch_label')}
+</a>
+
+<style>
+  /* 言語切り替え。ヘッダーの右端に置く小さなピル。
+     トークンは global.css の :root にあるものだけを使います（再定義しない）。 */
+  .lang-switch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    min-height: 2.25rem;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: var(--tracking-normal);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast),
+      color var(--transition-fast);
+  }
+
+  .lang-switch:hover {
+    background-color: var(--color-accent-soft);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+</style>

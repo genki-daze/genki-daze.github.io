@@ -1,0 +1,210 @@
+---
+/**
+ * ResearchSection.astro — 研究テーマ（#research）
+ *
+ * ・src/content/research/{ja,en}/*.md を読み、`lang` に合うものだけを出します。
+ *   （id が 'ja/topic-1' のような形になるので、'ja/' で始まるかで振り分けています）
+ * ・並び順は各 .md の frontmatter の `order`（小さい順）。
+ * ・本文は render(entry) で描画します。こうすることで $…$ / $$…$$ の数式が
+ *   KaTeX で組版されます（frontmatter の文字列では数式は出ません）。
+ * ・文言はすべて src/i18n/ui.ts の t(lang) 経由です。直接日本語を書かないこと。
+ *
+ * 使い方:  <ResearchSection lang="ja" />
+ */
+import { getCollection, render } from 'astro:content';
+import { t } from '../i18n/ui';
+import type { Lang } from '../i18n/ui';
+
+export interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = t(lang);
+
+// 表示する言語のテーマだけを order の小さい順に
+const entries = (await getCollection('research'))
+  .filter((entry) => entry.id.startsWith(`${lang}/`))
+  .sort((a, b) => a.data.order - b.data.order);
+
+// Markdown 本文は非同期に描画されるので、先にまとめて解決しておきます。
+const cards = await Promise.all(
+  entries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { entry, Content };
+  }),
+);
+---
+
+<section class="section section--alt" id="research" aria-labelledby="research-title">
+  <div class="container">
+    <h2 class="section__title" id="research-title">{tr('section_research')}</h2>
+
+    {
+      cards.length === 0 ? (
+        <p class="muted">{tr('empty_state')}</p>
+      ) : (
+        <ul class="cards">
+          {cards.map(({ entry, Content }) => (
+            <li class="card">
+              <h3 class="card__title">{entry.data.title}</h3>
+
+              <p class="card__lead">{entry.data.summary}</p>
+
+              <div class="card__summary prose">
+                <Content />
+              </div>
+
+              {entry.data.keywords.length > 0 && (
+                <ul class="card__keywords">
+                  {entry.data.keywords.map((keyword) => (
+                    <li class="tag tag--sm">{keyword}</li>
+                  ))}
+                </ul>
+              )}
+
+              {entry.data.links.length > 0 && (
+                <ul class="card__links">
+                  {entry.data.links.map((link) => (
+                    <li>
+                      <a class="link-arrow" href={link.url}>
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  /* ------------------------------------------------------------------------
+     ここは ResearchSection 専用のスタイルです（Astro のスコープ付き <style>）。
+     色・余白・文字サイズは global.css の :root トークンだけを使います。
+     トークンをここで定義し直さないでください。
+     ------------------------------------------------------------------------ */
+
+  /* --- セクションの外枠 ---------------------------------------------------
+     .section / .section--alt / .section__title は「見出し付きセクション」共通の
+     見た目です。global.css のユーティリティには含まれていないため、
+     各セクションのコンポーネントが自分の <style> で持ちます。 */
+  .section {
+    padding-block: var(--space-2xl);
+  }
+
+  .section--alt {
+    background-color: var(--color-surface-alt);
+    border-block: 1px solid var(--color-border);
+  }
+
+  .section__title {
+    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-2xl);
+  }
+
+  /* --- カード一覧 ---------------------------------------------------------
+     研究テーマは本文が長く数式も入るので、常に1カラムで縦に積みます。
+     （読みやすさは .prose の max-width: var(--measure) が担保します） */
+  .cards {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .card {
+    padding: var(--space-md);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card__title {
+    font-size: var(--font-size-xl);
+    /* 見出しの上に細いアクセント線を1本だけ。装飾はこれ以上増やしません。 */
+    padding-top: var(--space-2xs);
+    border-top: 2px solid var(--color-accent);
+  }
+
+  /* frontmatter の summary（1〜2行の要約）。本文の導入として置きます。 */
+  .card__lead {
+    margin-top: var(--space-2xs);
+    max-width: var(--measure);
+    color: var(--color-text-muted);
+    line-height: var(--leading-normal);
+    letter-spacing: var(--tracking-ja);
+  }
+
+  /* Markdown 本文。中身のタイポグラフィは global.css の .prose が持ちます
+     （描画された Markdown にはこのコンポーネントのスコープが付かないため、
+     ここで子孫セレクタを書いても当たりません）。 */
+  .card__summary {
+    margin-top: var(--space-sm);
+  }
+
+  /* --- キーワード / リンク ------------------------------------------------ */
+  .card__keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs) var(--space-2xs);
+    margin-top: var(--space-md);
+  }
+
+  .card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-md);
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* --- 広い画面 ----------------------------------------------------------- */
+  @media (min-width: 48em) {
+    .section {
+      padding-block: var(--space-3xl);
+    }
+
+    .section__title {
+      margin-bottom: var(--space-xl);
+    }
+
+    .cards {
+      gap: var(--space-lg);
+    }
+
+    .card {
+      padding: var(--space-lg);
+    }
+  }
+
+  /* --- 印刷（global.css の @media print と足並みを揃える）---------------- */
+  @media print {
+    .card {
+      padding: 0;
+      border: 0;
+      border-top: 1px solid #999999;
+      border-radius: 0;
+      box-shadow: none;
+      padding-top: var(--space-xs);
+    }
+
+    .card + .card {
+      margin-top: var(--space-sm);
+    }
+
+    .card__title {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .card__links {
+      border-top: 0;
+      padding-top: 0;
+    }
+  }
+</style>

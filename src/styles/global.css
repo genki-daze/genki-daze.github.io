@@ -1,0 +1,776 @@
+/* ============================================================================
+   global.css — デザイントークン / リセット / タイポグラフィ / ユーティリティ
+   ----------------------------------------------------------------------------
+   このファイルは BaseLayout.astro から一度だけ読み込まれます。
+   ・色・余白・文字サイズなどの「トークン」は :root にだけ書きます。
+   ・ダークモードは @media (prefers-color-scheme: dark) で
+     「同じトークンに別の値を入れ直す」だけです。コンポーネントの CSS は複製しません。
+   ・各コンポーネント固有のスタイルは、その .astro の <style> に書いてください。
+   ============================================================================ */
+
+/* ---------------------------------------------------------------------------
+   1. トークン（ライト）
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+
+  /* --- 色: 面 ------------------------------------------------------------ */
+  --color-bg: #fbfbfa;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f4f4f2;
+
+  /* --- 色: 文字 ----------------------------------------------------------
+     WCAG コントラスト比（実測値。sRGB 相対輝度から計算）:
+       --color-heading   #12141a on --color-bg          #fbfbfa = 17.78:1  AAA
+       --color-text      #1b1d23 on --color-bg          #fbfbfa = 16.27:1  AAA
+       --color-text      #1b1d23 on --color-surface     #ffffff = 16.85:1  AAA
+       --color-text      #1b1d23 on --color-surface-alt #f4f4f2 = 15.30:1  AAA
+       --color-text-muted #565c6b on --color-bg         #fbfbfa =  6.46:1  AA
+       --color-text-muted #565c6b on --color-surface    #ffffff =  6.69:1  AA
+       --color-text-muted #565c6b on --color-surface-alt #f4f4f2 = 6.08:1  AA
+     ---------------------------------------------------------------------- */
+  --color-heading: #12141a;
+  --color-text: #1b1d23;
+  --color-text-muted: #565c6b;
+
+  /* --- 色: アクセント（深いインディゴ 1色のみ）--------------------------
+     WCAG コントラスト比（実測値）:
+       --color-accent          #33408f on --color-bg          #fbfbfa = 8.93:1  AAA
+       --color-accent          #33408f on --color-surface     #ffffff = 9.25:1  AAA
+       --color-accent          #33408f on --color-surface-alt #f4f4f2 = 8.40:1  AAA
+       --color-accent          #33408f on --color-accent-soft #eceefa = 8.00:1  AAA
+       --color-accent-hover    #232e6b on --color-bg          #fbfbfa = 12.11:1 AAA
+       --color-accent-contrast #ffffff on --color-accent      #33408f = 9.25:1  AAA
+       --color-accent-contrast #ffffff on --color-accent-hover #232e6b = 12.54:1 AAA
+       --color-text            #1b1d23 on --color-accent-soft #eceefa = 14.58:1 AAA
+       --color-text-muted      #565c6b on --color-accent-soft #eceefa =  5.79:1 AA
+     ---------------------------------------------------------------------- */
+  --color-accent: #33408f;
+  --color-accent-hover: #232e6b;
+  --color-accent-contrast: #ffffff;
+  --color-accent-soft: #eceefa;
+
+  /* --- 色: 罫線・その他 -------------------------------------------------- */
+  --color-border: #e2e2df;
+  --color-border-strong: #c9c9c4;
+  --color-focus: #33408f;
+  --color-code-bg: #f1f1ee;
+  --color-selection: #d9def7;
+  --color-shadow: 22 24 32;
+
+  /* --- 影（--color-shadow の RGB 成分を使う）----------------------------- */
+  --shadow-sm: 0 1px 2px rgb(var(--color-shadow) / 0.06);
+  --shadow-md: 0 2px 4px rgb(var(--color-shadow) / 0.05), 0 8px 24px rgb(var(--color-shadow) / 0.06);
+
+  /* --- 書体（システムフォントのみ。Web フォントは読み込みません）-------- */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans',
+    'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Noto Sans JP', Meiryo, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Hiragino Sans', monospace;
+
+  /* --- 文字サイズ（fluid: 狭い画面〜広い画面で自動調整）----------------- */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.0625rem;
+  --font-size-xl: clamp(1.125rem, 0.35vw + 1.05rem, 1.25rem);
+  --font-size-2xl: clamp(1.35rem, 0.7vw + 1.2rem, 1.6rem);
+  --font-size-3xl: clamp(1.75rem, 1.6vw + 1.4rem, 2.4rem);
+
+  /* --- 行送り / 字間 ----------------------------------------------------- */
+  --leading-tight: 1.3;
+  --leading-snug: 1.5;
+  --leading-normal: 1.7;
+  --leading-prose: 1.9; /* 日本語の本文 */
+  --tracking-tight: 0;
+  --tracking-normal: 0.01em;
+  --tracking-ja: 0.02em; /* 日本語の本文 */
+  --tracking-wide: 0.08em; /* 小さい見出し・ラベル用 */
+
+  /* --- 余白スケール ------------------------------------------------------ */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4.5rem;
+  --space-3xl: 6.5rem;
+
+  /* --- レイアウト -------------------------------------------------------- */
+  --container-max: 60rem;
+  --container-pad: 1.25rem;
+  --header-height: 3.5rem;
+  --measure: 42rem; /* 本文1行の最大長 */
+
+  /* --- 角丸 -------------------------------------------------------------- */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 999px;
+
+  /* --- モーション -------------------------------------------------------- */
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+
+  /* --- 重なり順 ---------------------------------------------------------- */
+  --z-header: 100;
+  --z-skip: 200;
+}
+
+/* ---------------------------------------------------------------------------
+   2. トークン（ダーク）— 同じトークンを再代入するだけ
+   --------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-bg: #101216;
+    --color-surface: #171a20;
+    --color-surface-alt: #171a20;
+
+    /* WCAG コントラスト比（実測値）:
+         --color-heading   #f2f4f8 on --color-bg          #101216 = 17.03:1 AAA
+         --color-text      #e7e9ee on --color-bg          #101216 = 15.43:1 AAA
+         --color-text      #e7e9ee on --color-surface     #171a20 = 14.35:1 AAA
+         --color-text      #e7e9ee on --color-surface-alt #171a20 = 14.35:1 AAA
+         --color-text-muted #a2a9b8 on --color-bg         #101216 =  7.95:1 AAA
+         --color-text-muted #a2a9b8 on --color-surface    #171a20 =  7.39:1 AAA */
+    --color-heading: #f2f4f8;
+    --color-text: #e7e9ee;
+    --color-text-muted: #a2a9b8;
+
+    /* WCAG コントラスト比（実測値）:
+         --color-accent          #a7b8f0 on --color-bg          #101216 =  9.60:1 AAA
+         --color-accent          #a7b8f0 on --color-surface     #171a20 =  8.93:1 AAA
+         --color-accent          #a7b8f0 on --color-surface-alt #171a20 =  8.93:1 AAA
+         --color-accent          #a7b8f0 on --color-accent-soft #1c2130 =  8.21:1 AAA
+         --color-accent-hover    #c2cef6 on --color-bg          #101216 = 12.01:1 AAA
+         --color-accent-contrast #0d0f13 on --color-accent      #a7b8f0 =  9.83:1 AAA
+         --color-accent-contrast #0d0f13 on --color-accent-hover #c2cef6 = 12.29:1 AAA
+         --color-text            #e7e9ee on --color-accent-soft #1c2130 = 13.20:1 AAA
+         --color-text-muted      #a2a9b8 on --color-accent-soft #1c2130 =  6.80:1 AA */
+    --color-accent: #a7b8f0;
+    --color-accent-hover: #c2cef6;
+    --color-accent-contrast: #0d0f13;
+    --color-accent-soft: #1c2130;
+
+    --color-border: #2a2e37;
+    --color-border-strong: #3b414d;
+    --color-focus: #a7b8f0;
+    --color-code-bg: #191c23;
+    --color-selection: #2c3450;
+    --color-shadow: 0 0 0;
+
+    --shadow-sm: 0 1px 2px rgb(var(--color-shadow) / 0.4);
+    --shadow-md: 0 2px 4px rgb(var(--color-shadow) / 0.3), 0 8px 24px rgb(var(--color-shadow) / 0.45);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   3. リセット
+   --------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-height) + var(--space-sm));
+}
+
+body {
+  min-height: 100dvh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'palt' 0;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+img,
+video {
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+/* hidden 属性が display 指定に負けないように（JS が使えない時に
+   #copy-email を隠す処理がこれに依存しています） */
+[hidden] {
+  display: none !important;
+}
+
+::selection {
+  background-color: var(--color-selection);
+  color: var(--color-text);
+}
+
+/* ---------------------------------------------------------------------------
+   4. タイポグラフィ（日本語ふくむ）
+   --------------------------------------------------------------------------- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-heading);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  /* 日本語の見出しが変な位置で折れないように */
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
+p,
+li,
+dd,
+dt,
+figcaption {
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+code {
+  background-color: var(--color-code-bg);
+  border-radius: var(--radius-sm);
+  padding: 0.1em 0.35em;
+}
+
+pre {
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  overflow-x: auto;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* :focus-visible のアウトラインは必ず見えるように（キーボード操作の生命線） */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   5. ユーティリティ（DOM 契約 §6）
+   --------------------------------------------------------------------------- */
+
+/* --- .container --------------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+/* --- .btn / .btn--primary / .btn--ghost --------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  min-height: 2.75rem;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-normal);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.btn--primary {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: var(--color-accent-contrast);
+}
+
+.btn--ghost {
+  background-color: transparent;
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.btn--ghost:hover {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.btn[disabled],
+.btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* --- .tag / .tag--sm ---------------------------------------------------- */
+.tag {
+  display: inline-block;
+  padding: 0.3em 0.75em;
+  background-color: var(--color-accent-soft);
+  border-radius: var(--radius-full);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: var(--tracking-normal);
+  white-space: nowrap;
+}
+
+.tag--sm {
+  padding: 0.15em 0.6em;
+  font-size: var(--font-size-xs);
+}
+
+/* --- .badge ------------------------------------------------------------- */
+.badge {
+  display: inline-block;
+  padding: 0.15em 0.55em;
+  background-color: var(--color-accent-soft);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: var(--tracking-wide);
+  white-space: nowrap;
+}
+
+/* --- .chip（リンク用の小さい枠）---------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.2em 0.7em;
+  background-color: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color var(--transition-fast), color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.chip:hover {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.chip .icon {
+  width: 0.85em;
+  height: 0.85em;
+}
+
+/* --- .prose（Markdown 本文）-------------------------------------------- */
+.prose {
+  max-width: var(--measure);
+  color: var(--color-text);
+  font-size: var(--font-size-lg);
+  line-height: var(--leading-prose);
+  letter-spacing: var(--tracking-ja);
+  word-break: normal;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
+.prose > * + * {
+  margin-top: var(--space-sm);
+}
+
+.prose > * + :is(h2, h3, h4) {
+  margin-top: var(--space-lg);
+}
+
+.prose :is(h2, h3, h4) {
+  letter-spacing: var(--tracking-tight);
+}
+
+.prose h2 {
+  font-size: var(--font-size-xl);
+}
+
+.prose h3 {
+  font-size: var(--font-size-lg);
+}
+
+.prose h4 {
+  font-size: var(--font-size-base);
+}
+
+.prose :is(ul, ol) {
+  padding-inline-start: 1.4em;
+}
+
+.prose ul {
+  list-style: disc;
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li + li {
+  margin-top: var(--space-3xs);
+}
+
+.prose li::marker {
+  color: var(--color-text-muted);
+}
+
+.prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.prose strong {
+  color: var(--color-heading);
+  font-weight: 700;
+}
+
+.prose blockquote {
+  padding-inline-start: var(--space-sm);
+  border-inline-start: 2px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+}
+
+.prose :is(img, figure) {
+  border-radius: var(--radius-md);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-base);
+}
+
+.prose :is(th, td) {
+  padding: var(--space-2xs) var(--space-xs);
+  border-bottom: 1px solid var(--color-border);
+  text-align: start;
+}
+
+.prose th {
+  color: var(--color-heading);
+  font-weight: 600;
+}
+
+/* 表が横にはみ出さないように */
+.prose > table {
+  display: block;
+  overflow-x: auto;
+}
+
+/* --- .link-arrow -------------------------------------------------------- */
+.link-arrow {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link-arrow::after {
+  content: '\2192'; /* → */
+  transition: transform var(--transition-fast);
+}
+
+.link-arrow:hover {
+  color: var(--color-accent-hover);
+  text-decoration: underline;
+}
+
+.link-arrow:hover::after {
+  transform: translateX(2px);
+}
+
+/* --- .icon（Icon.astro が出力する <svg> の既定サイズ）------------------
+   fill / stroke はここで指定しません。Icon.astro 側が SVG の属性として
+   fill="currentColor"（ブランドマーク）か fill="none" stroke="currentColor"（線画）を
+   出し分けています。ここで fill を書くと属性より CSS が優先され、線画が塗り潰されます。 */
+.icon {
+  display: inline-block;
+  width: 1.125em;
+  height: 1.125em;
+  flex: none;
+  vertical-align: middle;
+  pointer-events: none;
+}
+
+/* --- .visually-hidden（読み上げには残す）------------------------------- */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+
+/* --- .is-active / .is-open（JS が付け外しする状態クラス）---------------
+   見た目の中身は各コンポーネントの <style> 側で指定します。
+   ここでは全体で共通の意味だけを定義します。 */
+.is-active {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.is-open {
+  display: block;
+}
+
+/* --- .muted ------------------------------------------------------------- */
+.muted {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   6. 数式（KaTeX）— CSS 本体は BaseLayout.astro でローカル読み込み
+   --------------------------------------------------------------------------- */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: var(--space-3xs);
+}
+
+.katex {
+  font-size: 1.05em;
+}
+
+/* ---------------------------------------------------------------------------
+   7. モーション削減の設定を尊重
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   8. 印刷用（Cmd+P → PDF が CV としてそのまま使える状態にする）
+   --------------------------------------------------------------------------- */
+@media print {
+  /* 印刷は常に「白地に黒」。ダークモードのトークンを打ち消す。 */
+  :root {
+    color-scheme: light;
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-alt: #ffffff;
+    --color-heading: #000000;
+    --color-text: #000000;
+    --color-text-muted: #333333;
+    --color-accent: #000000;
+    --color-accent-hover: #000000;
+    --color-accent-contrast: #ffffff;
+    --color-accent-soft: #ffffff;
+    --color-border: #999999;
+    --color-border-strong: #666666;
+    --color-code-bg: #ffffff;
+    --shadow-sm: none;
+    --shadow-md: none;
+  }
+
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  html {
+    scroll-padding-top: 0;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+    font-size: 10.5pt;
+    line-height: 1.6;
+  }
+
+  /* 画面のためだけの要素は印刷しない */
+  .site-header,
+  .site-footer,
+  .skip-link,
+  .nav-toggle,
+  .site-nav,
+  .lang-switch,
+  .hero__actions,
+  .to-top,
+  .btn,
+  .social,
+  #copy-email {
+    display: none !important;
+  }
+
+  .section,
+  .section--alt {
+    padding-block: var(--space-md);
+    background: none !important;
+    border: 0;
+    break-inside: auto;
+  }
+
+  .container {
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  .prose {
+    max-width: none;
+    font-size: 10.5pt;
+  }
+
+  /* 見出しとその直後が離れ離れにならないように */
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+    break-inside: avoid;
+  }
+
+  .pub,
+  .card,
+  .timeline__item {
+    break-inside: avoid;
+  }
+
+  .tag,
+  .badge,
+  .chip {
+    background: none !important;
+    border: 1px solid #666666;
+    color: #000000 !important;
+  }
+
+  a {
+    color: #000000;
+    text-decoration: none;
+  }
+
+  /* 業績リンクは URL を展開して紙の上でも辿れるようにする */
+  .pub__links a::after,
+  .card__links a::after {
+    content: ' <' attr(href) '>';
+    font-family: var(--font-mono);
+    font-size: 8pt;
+    font-weight: 400;
+    word-break: break-all;
+  }
+
+  .pub__links .chip,
+  .card__links .link-arrow {
+    border: 0;
+    padding: 0;
+  }
+
+  .link-arrow::after {
+    content: none;
+  }
+
+  img {
+    break-inside: avoid;
+  }
+}
