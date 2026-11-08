@@ -26,17 +26,17 @@
   title:
     ja: 'LM-QASAS: Reference-free identification of antigen-specific sequences from the BCR repertoire using antibody language models'
     en: 'LM-QASAS: Reference-free identification of antigen-specific sequences from the BCR repertoire using antibody language models'
-  # TODO(user): 掲載後に「掲載決定 / in press」を外し、巻・論文番号と Frontiers 側の DOI を追記してください。
-  #             month も実際の掲載月に更新すること（今は acceptance の月を入れています）。
   venue:
-    ja: Frontiers in Immunology（掲載決定）
-    en: Frontiers in Immunology (in press)
+    ja: Frontiers in Immunology, 17: 1844788
+    en: Frontiers in Immunology, 17: 1844788
   year: 2026
   month: 7
   # プレプリント（medRxiv v1, posted 2026-04-01）は査読前の版です。
   # 数値・主張が査読版と異なるため、掲載後は Frontiers 側のリンクを主にしてください。
   # label は日英で共通なので、言語に依らず読めるものにしています。
   links:
+    - label: DOI
+      url: https://doi.org/10.3389/fimmu.2026.1844788
     - label: Preprint (medRxiv)
       url: https://doi.org/10.64898/2026.03.31.26349834
 
