@@ -42,6 +42,23 @@
 
 # ---------------- 国内学会・シンポジウムにおける発表 ----------------
 
+- id: cbi-annual-2026
+  type: domestic_conf
+  authors:
+    ja: 増田元希, 大上雅史
+    en: G. Masuda, M. Ohue
+  title:
+    ja: Antigen-Specific Alignment of Antibody Generative Models toward Reliable Reference Databases for Clinical BCR Repertoire Analysis
+    en: Antigen-Specific Alignment of Antibody Generative Models toward Reliable Reference Databases for Clinical BCR Repertoire Analysis
+  venue:
+    ja: CBI学会2026年大会, 2026年10月（ポスター発表）
+    en: CBI Society Annual Meeting 2026, October 2026 (Poster)
+  year: 2026
+  month: 10
+  award:
+    ja: 学生発表奨励賞
+    en: Excellent Student Abstract Award
+
 - id: iibmp-2026
   type: domestic_conf
   authors:
@@ -115,9 +132,6 @@
     en: CBI Society Annual Meeting 2025, October 2025 (Poster)
   year: 2025
   month: 10
-  award:
-    ja: 学生発表奨励賞
-    en: Excellent Student Abstract Award
 
 - id: bioinfo-wakate-17th-2025
   type: domestic_conf
