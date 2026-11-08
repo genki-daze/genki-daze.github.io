@@ -42,6 +42,20 @@
 
 # ---------------- 国内学会・シンポジウムにおける発表 ----------------
 
+- id: iibmp-2026
+  type: domestic_conf
+  authors:
+    ja: 増田元希, 船越洋平, 飯棲俊介, 薬師神公和, 大路剛, 南博信, 大上雅史
+    en: G. Masuda, Y. Funakoshi, S. Iizumi, K. Yakushijin, G. Ohji, H. Minami, M. Ohue
+  title:
+    ja: 抗体言語モデルによる抗原特異的参照配列データベースの構築：BCRレパトアから免疫状態を推定するQASAS法に向けて
+    en: Antibody Language Model-Based Construction of Antigen-Specific Reference Sequence Databases for QASAS-Based Immune State Estimation from BCR Repertoires
+  venue:
+    ja: 2026年日本バイオインフォマティクス学会年会・第14回生命医薬情報学連合大会 (IIBMP2026), 神奈川, 2026年8月（ポスター発表）
+    en: JSBi Annual Meeting 2026 / IIBMP2026, Kanagawa, Japan, August 2026 (Poster)
+  year: 2026
+  month: 8
+
 - id: ipsj-sigbio-85-2026
   type: domestic_conf
   authors:
@@ -101,6 +115,9 @@
     en: CBI Society Annual Meeting 2025, October 2025 (Poster)
   year: 2025
   month: 10
+  award:
+    ja: 学生発表奨励賞
+    en: Excellent Student Abstract Award
 
 - id: bioinfo-wakate-17th-2025
   type: domestic_conf
